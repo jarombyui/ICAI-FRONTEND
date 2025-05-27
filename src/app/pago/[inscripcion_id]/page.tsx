@@ -47,7 +47,7 @@ export default function PagoPage() {
         monto: inscripcion.curso.precio,
       });
       setMsg('¡Pago realizado con éxito!');
-      setTimeout(() => router.push('/mis-cursos'), 1500);
+      setTimeout(() => router.push(`/mis-cursos/${inscripcion.curso.id}`), 3000);
     } catch (err: any) {
       setMsg(err.response?.data?.error || 'Error al realizar el pago');
     }

@@ -43,7 +43,13 @@ export default function MisCursosPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {inscripciones.map(insc => (
             <div key={insc.id} className="border rounded p-4 bg-white shadow">
-              <h2 className="text-xl font-semibold">{insc.curso.nombre}</h2>
+              {insc.estado === 'comprado' ? (
+                <Link href={`/mis-cursos/${insc.curso.id}`}>
+                  <h2 className="text-xl font-semibold cursor-pointer hover:underline">{insc.curso.nombre}</h2>
+                </Link>
+              ) : (
+                <h2 className="text-xl font-semibold">{insc.curso.nombre}</h2>
+              )}
               <p className="text-gray-600">{insc.curso.descripcion}</p>
               <div className="mt-2 flex justify-between items-center">
                 <span className="font-bold text-blue-600">S/. {insc.curso.precio}</span>
