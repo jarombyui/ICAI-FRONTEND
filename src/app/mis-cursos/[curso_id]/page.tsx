@@ -68,14 +68,14 @@ export default function MaterialesCursoPage() {
   return (
     <div className="max-w-3xl mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-6">{curso.nombre} - Materiales</h1>
-      {curso.modulos.map(modulo => (
+      {curso.modulos?.length ? curso.modulos.map(modulo => (
         <div key={modulo.id} className="mb-6">
           <h2 className="text-xl font-semibold mb-2">{modulo.nombre}</h2>
-          {modulo.subtemas.map(subtema => (
+          {modulo.subtemas?.length ? modulo.subtemas.map(subtema => (
             <div key={subtema.id} className="ml-4 mb-2">
               <h3 className="font-semibold">{subtema.nombre}</h3>
               <ul className="ml-4">
-                {subtema.materiales.map(material => (
+                {subtema.materiales?.length ? subtema.materiales.map(material => (
                   <li key={material.id} className="mb-1">
                     {material.tipo === 'video' ? (
                       <iframe
@@ -99,12 +99,12 @@ export default function MaterialesCursoPage() {
                       </a>
                     )}
                   </li>
-                ))}
+                )) : <li className="text-gray-500">No hay materiales.</li>}
               </ul>
             </div>
-          ))}
+          )) : <div className="ml-4 text-gray-500">No hay subtemas.</div>}
         </div>
-      ))}
+      )) : <div className="text-gray-500">No hay módulos.</div>}
     </div>
   );
 } 
