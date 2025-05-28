@@ -29,6 +29,31 @@ type Curso = {
   modulos: Modulo[];
 };
 
+function ExamenesModulo({ moduloId, cursoId }: { moduloId: number, cursoId: number }) {
+  const [examenes, setExamenes] = useState<any[]>([]);
+  useEffect(() => {
+    api.get(`/examenes/modulos/${moduloId}/examenes`).then(res => setExamenes(res.data));
+  }, [moduloId]);
+  if (!examenes.length) return null;
+  return (
+    <div className="mt-2">
+      <h3 className="font-semibold">Exámenes:</h3>
+      <ul>
+        {examenes.map(examen => (
+          <li key={examen.id} className="mb-1">
+            {examen.nombre}{" "}
+            <Link href={`/mis-cursos/${cursoId}/examenes/${examen.id}`}>
+              <button className="bg-blue-700 text-white px-2 py-1 rounded hover:bg-blue-800 ml-2">
+                Rendir examen
+              </button>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function MaterialesCursoPage() {
   const { curso_id } = useParams<{ curso_id: string }>();
   const router = useRouter();
@@ -71,6 +96,7 @@ export default function MaterialesCursoPage() {
       {curso.modulos?.length ? curso.modulos.map(modulo => (
         <div key={modulo.id} className="mb-6">
           <h2 className="text-xl font-semibold mb-2">{modulo.nombre}</h2>
+          <ExamenesModulo moduloId={modulo.id} cursoId={curso.id} />
           {modulo.subtemas?.length ? modulo.subtemas.map(subtema => (
             <div key={subtema.id} className="ml-4 mb-2">
               <h3 className="font-semibold">{subtema.nombre}</h3>
