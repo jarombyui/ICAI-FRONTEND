@@ -4,7 +4,7 @@ import api from '@/utils/api';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const [form, setForm] = useState({ nombre: '', apellido: '', email: '', password: '' });
+  const [form, setForm] = useState({ nombre: '', apellido: '', email: '', password: '', dni: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -44,7 +44,7 @@ export default function AuthPage() {
             <input
               type="text"
               name="nombre"
-              placeholder="Nombre"
+              placeholder="Nombres"
               value={form.nombre}
               onChange={handleChange}
               className="w-full border p-2 rounded"
@@ -53,8 +53,17 @@ export default function AuthPage() {
             <input
               type="text"
               name="apellido"
-              placeholder="Apellido"
+              placeholder="Apellidos"
               value={form.apellido}
+              onChange={handleChange}
+              className="w-full border p-2 rounded"
+              required
+            />
+            <input
+              type="text"
+              name="dni"
+              placeholder="DNI"
+              value={form.dni}
               onChange={handleChange}
               className="w-full border p-2 rounded"
               required

@@ -3,10 +3,24 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import api from "@/utils/api";
 
+function getUserId() {
+  if (typeof window === 'undefined') return null;
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.id;
+  } catch {
+    return null;
+  }
+}
+
 function HistorialIntentos({ examenId }: { examenId: string }) {
   const [intentos, setIntentos] = useState<any[]>([]);
   useEffect(() => {
-    api.get(`/examenes/examenes/${examenId}/intentos?usuario_id=1`).then(res => setIntentos(res.data));
+    const usuario_id = getUserId();
+    if (!usuario_id) return;
+    api.get(`/examenes/examenes/${examenId}/intentos?usuario_id=${usuario_id}`).then(res => setIntentos(res.data));
   }, [examenId]);
   if (!intentos.length) return null;
   return (
@@ -63,7 +77,12 @@ export default function ExamenPage() {
       }))
     };
     try {
-      const res = await api.post(`/examenes/examenes/${examen_id}/responder`, body);
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const res = await api.post(
+        `/examenes/examenes/${examen_id}/responder`,
+        body,
+        token ? { headers: { Authorization: `Bearer ${token}` } } : {}
+      );
       setResultado(res.data);
     } catch {
       setMsg("No se pudo enviar el examen");
