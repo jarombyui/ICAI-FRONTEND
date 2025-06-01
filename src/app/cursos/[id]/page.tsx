@@ -33,12 +33,8 @@ export default function CursoDetallePage() {
       router.push('/auth');
       return;
     }
-    const payload = JSON.parse(atob(token.split('.')[1]));
     try {
-      await api.post('/inscripciones', {
-        usuario_id: payload.id,
-        curso_id: curso?.id,
-      });
+      await api.post('/inscripciones', { curso_id: curso?.id });
       setMsg('¡Inscripción exitosa! Revisa "Mis cursos".');
     } catch (err: any) {
       setMsg(err.response?.data?.error || 'Error al inscribirse');

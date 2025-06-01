@@ -21,6 +21,7 @@ type Modulo = {
   id: number;
   nombre: string;
   subtemas: Subtema[];
+  examenes?: any[];
 };
 
 type Curso = {
@@ -69,8 +70,7 @@ export default function MaterialesCursoPage() {
       router.push('/auth');
       return;
     }
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    api.get(`/inscripciones/usuario/${payload.id}`)
+    api.get('/inscripciones/mis')
       .then(res => {
         const insc = res.data.find((i: any) => i.curso.id === Number(curso_id));
         if (!insc || insc.estado !== 'comprado') {
@@ -93,10 +93,56 @@ export default function MaterialesCursoPage() {
   return (
     <div className="max-w-3xl mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-6">{curso.nombre} - Materiales</h1>
+      <button
+        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-6"
+        onClick={async () => {
+          setMsg('');
+          try {
+            // Obtener el usuario_id del token
+            const token = localStorage.getItem('token');
+            if (!token) {
+              setMsg('Debes iniciar sesión.');
+              return;
+            }
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const usuario_id = payload.id;
+            // 1. Generar el certificado (POST /certificados/emitir)
+            await api.post('/certificados/emitir', { usuario_id, curso_id: Number(curso_id) });
+            // 2. Descargar el certificado (GET /certificados/descargar/:curso_id)
+            const res = await api.get(`/certificados/descargar/${curso_id}`, { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `certificado_${curso_id}.pdf`;
+            a.click();
+            setMsg('Certificado generado y descargado correctamente.');
+          } catch (err: any) {
+            setMsg(err?.response?.data?.error || 'No se pudo generar o descargar el certificado');
+          }
+        }}
+      >
+        Descargar certificado
+      </button>
       {curso.modulos?.length ? curso.modulos.map(modulo => (
         <div key={modulo.id} className="mb-6">
           <h2 className="text-xl font-semibold mb-2">{modulo.nombre}</h2>
-          <ExamenesModulo moduloId={modulo.id} cursoId={curso.id} />
+          {modulo.examenes && modulo.examenes.length > 0 && (
+            <div className="mb-2">
+              <h3 className="font-semibold">Exámenes:</h3>
+              <ul>
+                {modulo.examenes.map((examen: any) => (
+                  <li key={examen.id} className="mb-1">
+                    {examen.nombre}{" "}
+                    <Link href={`/mis-cursos/${curso.id}/examenes/${examen.id}`}>
+                      <button className="bg-blue-700 text-white px-2 py-1 rounded hover:bg-blue-800 ml-2">
+                        Rendir examen
+                      </button>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {modulo.subtemas?.length ? modulo.subtemas.map(subtema => (
             <div key={subtema.id} className="ml-4 mb-2">
               <h3 className="font-semibold">{subtema.nombre}</h3>

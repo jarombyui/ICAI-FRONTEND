@@ -1,6 +1,9 @@
 import Image from "next/image";
+import { getCurrentUser } from '@/utils/api';
+import Link from 'next/link';
 
 export default function Home() {
+  const user = typeof window !== 'undefined' ? getCurrentUser() : null;
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -49,6 +52,19 @@ export default function Home() {
           >
             Read our docs
           </a>
+        </div>
+
+        <div className="flex gap-6">
+          {user?.rol === 'admin' && (
+            <Link href="/dashboard/admin">
+              <button className="px-6 py-3 bg-blue-700 rounded-lg shadow-lg hover:bg-blue-800 text-lg font-semibold transition">Dashboard Admin</button>
+            </Link>
+          )}
+          {user?.rol === 'user' && (
+            <Link href="/dashboard/user">
+              <button className="px-6 py-3 bg-green-600 rounded-lg shadow-lg hover:bg-green-700 text-lg font-semibold transition">Mi Panel de Usuario</button>
+            </Link>
+          )}
         </div>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">

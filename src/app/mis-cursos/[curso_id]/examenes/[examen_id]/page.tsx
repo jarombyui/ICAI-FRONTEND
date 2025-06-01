@@ -18,9 +18,7 @@ function getUserId() {
 function HistorialIntentos({ examenId }: { examenId: string }) {
   const [intentos, setIntentos] = useState<any[]>([]);
   useEffect(() => {
-    const usuario_id = getUserId();
-    if (!usuario_id) return;
-    api.get(`/examenes/examenes/${examenId}/intentos?usuario_id=${usuario_id}`).then(res => setIntentos(res.data));
+    api.get(`/examenes/examenes/${examenId}/mis-intentos`).then(res => setIntentos(res.data));
   }, [examenId]);
   if (!intentos.length) return null;
   return (
@@ -77,12 +75,7 @@ export default function ExamenPage() {
       }))
     };
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      const res = await api.post(
-        `/examenes/examenes/${examen_id}/responder`,
-        body,
-        token ? { headers: { Authorization: `Bearer ${token}` } } : {}
-      );
+      const res = await api.post(`/examenes/examenes/${examen_id}/responder`, body);
       setResultado(res.data);
     } catch {
       setMsg("No se pudo enviar el examen");

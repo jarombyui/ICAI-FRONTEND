@@ -25,10 +25,7 @@ export default function MisCursosPage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
-    // Decodifica el token para obtener el id del usuario (en producción usa jwt-decode)
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const usuario_id = payload.id;
-    api.get(`/inscripciones/usuario/${usuario_id}`)
+    api.get('/inscripciones/mis')
       .then(res => setInscripciones(res.data))
       .catch(() => setInscripciones([]))
       .finally(() => setLoading(false));

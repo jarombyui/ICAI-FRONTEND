@@ -22,7 +22,7 @@ export default function PagoPage() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    api.get(`/inscripciones/usuario/${getUserId()}`)
+    api.get('/inscripciones/mis')
       .then(res => {
         const found = res.data.find((i: Inscripcion) => i.id === Number(inscripcion_id));
         setInscripcion(found || null);
@@ -47,6 +47,11 @@ export default function PagoPage() {
         monto: inscripcion.curso.precio,
       });
       setMsg('¡Pago realizado con éxito!');
+      api.get('/inscripciones/mis')
+        .then(res => {
+          const found = res.data.find((i: Inscripcion) => i.id === Number(inscripcion_id));
+          setInscripcion(found || null);
+        });
       setTimeout(() => router.push(`/mis-cursos/${inscripcion.curso.id}`), 3000);
     } catch (err: any) {
       setMsg(err.response?.data?.error || 'Error al realizar el pago');
