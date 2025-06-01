@@ -8,9 +8,9 @@ export default function UsuariosAdminPage() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    api.get('/usuarios')
+    api.get('/usuario')
       .then(res => setUsuarios(res.data))
-      .catch(() => setMsg('Error al cargar usuarios'))
+      .catch(() => setMsg('Error al cargar usuarios (verifica conexión y permisos)'))
       .finally(() => setLoading(false));
   }, []);
 

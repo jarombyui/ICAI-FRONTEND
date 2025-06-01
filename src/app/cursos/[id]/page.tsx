@@ -18,6 +18,7 @@ export default function CursoDetallePage() {
   const [curso, setCurso] = useState<Curso | null>(null);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     api.get(`/cursos/${id}`)
@@ -25,6 +26,17 @@ export default function CursoDetallePage() {
       .catch(() => setCurso(null))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          setUser(JSON.parse(atob(token.split('.')[1])));
+        } catch {}
+      }
+    }
+  }, []);
 
   const handleInscribirse = async () => {
     const token = localStorage.getItem('token');
@@ -55,6 +67,22 @@ export default function CursoDetallePage() {
         <span className="font-bold text-blue-600">S/. {curso.precio}</span>
         <span className="text-sm text-gray-500">{curso.horas} horas</span>
       </div>
+      {user?.rol === 'admin' && (
+        <div className="mb-4 flex gap-2">
+          <button onClick={async () => {
+            if (!window.confirm('¿Eliminar este curso?')) return;
+            try {
+              await api.delete(`/cursos/${curso.id}`);
+              router.push('/cursos');
+            } catch {
+              alert('Error al eliminar curso');
+            }
+          }} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-800">Eliminar</button>
+          <button onClick={() => router.push(`/cursos/${curso.id}?edit=1`)} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Editar</button>
+          <button onClick={() => router.push(`/cursos/${curso.id}?tab=materiales`)} className="bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800">Materiales</button>
+          <button onClick={() => router.push(`/cursos/${curso.id}?tab=examenes`)} className="bg-green-700 text-white px-3 py-1 rounded hover:bg-green-800">Exámenes</button>
+        </div>
+      )}
       <button
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         onClick={handleInscribirse}

@@ -8,10 +8,9 @@ export default function PagosAdminPage() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    // Puedes crear un endpoint /pagos/admin/listar si quieres filtrar por admin
-    api.get('/pagos')
+    api.get('/pagos/admin/listar')
       .then(res => setPagos(res.data))
-      .catch(() => setMsg('Error al cargar pagos'))
+      .catch(() => setMsg('Error al cargar pagos (verifica conexión y permisos)'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -24,6 +23,8 @@ export default function PagosAdminPage() {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Usuario</th>
+              <th>Curso</th>
               <th>Inscripción</th>
               <th>Método</th>
               <th>Monto</th>
@@ -35,6 +36,8 @@ export default function PagosAdminPage() {
             {pagos.map(p => (
               <tr key={p.id} className="text-center">
                 <td>{p.id}</td>
+                <td>{p.inscripcion?.usuario?.nombre} {p.inscripcion?.usuario?.apellido}</td>
+                <td>{p.inscripcion?.curso?.nombre}</td>
                 <td>{p.inscripcion_id}</td>
                 <td>{p.metodo}</td>
                 <td>S/. {p.monto}</td>
