@@ -22,6 +22,9 @@ export default function Navbar() {
       <div className="flex gap-4">
         <Link href="/cursos" className="font-bold hover:underline">Explorar cursos</Link>
         {isAuth && <Link href="/mis-cursos" className="hover:underline">Mis cursos</Link>}
+        {isAuth && <Link href="/dashboard/admin/cursos" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cursos</Link>}
+        {isAuth && <Link href="/dashboard/admin/modulos" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Módulos</Link>}
+        {isAuth && <Link href="/dashboard/admin/examenes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Exámenes</Link>}
       </div>
       <div>
         {isAuth ? (

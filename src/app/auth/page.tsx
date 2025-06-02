@@ -21,14 +21,24 @@ export default function AuthPage() {
         const res = await api.post('/auth/login', { email: form.email, password: form.password });
         setSuccess('Login exitoso');
         localStorage.setItem('token', res.data.token);
-        window.location.href = '/cursos';
+        const payload = JSON.parse(atob(res.data.token.split('.')[1]));
+        if (payload.rol === 'admin') {
+          window.location.href = '/dashboard/admin';
+        } else {
+          window.location.href = '/dashboard/user';
+        }
       } else {
         await api.post('/auth/register', form);
         // Login automático tras registro
         const res = await api.post('/auth/login', { email: form.email, password: form.password });
         setSuccess('Registro y login exitosos');
         localStorage.setItem('token', res.data.token);
-        window.location.href = '/cursos';
+        const payload = JSON.parse(atob(res.data.token.split('.')[1]));
+        if (payload.rol === 'admin') {
+          window.location.href = '/dashboard/admin';
+        } else {
+          window.location.href = '/dashboard/user';
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Error');

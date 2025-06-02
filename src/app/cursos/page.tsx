@@ -12,10 +12,26 @@ type Curso = {
   imagen_url?: string;
 };
 
+type Categoria = {
+  id: number;
+  nombre: string;
+};
+
 export default function CursosPage() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: '',
+    descripcion: '',
+    precio: 0,
+    horas: 0,
+    categoria_id: '',
+    imagen_url: ''
+  });
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [msg, setMsg] = useState('');
 
   useEffect(() => {
     api.get('/cursos')
@@ -33,11 +49,32 @@ export default function CursosPage() {
         } catch {}
       }
     }
+    // Obtener categorías si hay endpoint
+    api.get('/categorias').then(res => setCategorias(res.data)).catch(() => setCategorias([]));
   }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      await api.post('/cursos', formData);
+      setShowModal(false);
+      setMsg('Curso creado');
+      setFormData({ nombre: '', descripcion: '', precio: 0, horas: 0, categoria_id: '', imagen_url: '' });
+      // Refrescar cursos
+      const res = await api.get('/cursos');
+      setCursos(res.data);
+    } catch {
+      setMsg('Error al crear curso');
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-6">Explorar Cursos</h1>
+      {user?.rol === 'admin' && (
+        <button onClick={() => setShowModal(true)} className="mb-6 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">Crear Curso</button>
+      )}
+      {msg && <div className="mb-4 text-green-600">{msg}</div>}
       {loading ? (
         <div>Cargando...</div>
       ) : (
@@ -73,6 +110,51 @@ export default function CursosPage() {
               )}
             </div>
           ))}
+        </div>
+      )}
+      {/* Modal de crear curso */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Crear Curso</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Nombre</label>
+                <input type="text" value={formData.nombre} onChange={e => setFormData({ ...formData, nombre: e.target.value })} className="w-full p-2 border rounded" required />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Descripción</label>
+                <textarea value={formData.descripcion} onChange={e => setFormData({ ...formData, descripcion: e.target.value })} className="w-full p-2 border rounded" rows={3} required />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Precio</label>
+                <input type="number" value={formData.precio} onChange={e => setFormData({ ...formData, precio: Number(e.target.value) })} className="w-full p-2 border rounded" required min={0} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Horas</label>
+                <input type="number" value={formData.horas} onChange={e => setFormData({ ...formData, horas: Number(e.target.value) })} className="w-full p-2 border rounded" required min={1} />
+              </div>
+              {categorias.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2">Categoría</label>
+                  <select value={formData.categoria_id} onChange={e => setFormData({ ...formData, categoria_id: e.target.value })} className="w-full p-2 border rounded" required>
+                    <option value="">Seleccione una categoría</option>
+                    {categorias.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">Imagen (URL)</label>
+                <input type="text" value={formData.imagen_url} onChange={e => setFormData({ ...formData, imagen_url: e.target.value })} className="w-full p-2 border rounded" />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setShowModal(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancelar</button>
+                <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Crear</button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
