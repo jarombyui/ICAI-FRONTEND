@@ -152,7 +152,10 @@ export default function ExamenesAdminPage() {
                 <td>
                   <button onClick={() => handleDelete(e.id)} className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-800 mr-2">Eliminar</button>
                   <button onClick={() => handleEdit(e)} className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mr-2">Editar</button>
-                  <button onClick={() => handlePreguntas(e)} className="bg-blue-700 text-white px-2 py-1 rounded hover:bg-blue-800">Preguntas</button>
+                  <button onClick={() => handlePreguntas(e)} className="bg-blue-700 text-white px-2 py-1 rounded hover:bg-blue-800 mr-2">Preguntas</button>
+                  <a href={`/dashboard/admin/examenes/${e.id}/preguntas`}>
+                    <button className="bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800">Gestionar Preguntas</button>
+                  </a>
                 </td>
               </tr>
             ))}

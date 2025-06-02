@@ -10,6 +10,7 @@ type Curso = {
   precio: number;
   horas: number;
   imagen_url?: string;
+  examen_id?: number;
 };
 
 type Inscripcion = {
@@ -41,9 +42,17 @@ export default function MisCursosPage() {
           {inscripciones.map(insc => (
             <div key={insc.id} className="border rounded p-4 bg-white shadow">
               {insc.estado === 'comprado' ? (
-                <Link href={`/mis-cursos/${insc.curso.id}`}>
-                  <h2 className="text-xl font-semibold cursor-pointer hover:underline">{insc.curso.nombre}</h2>
-                </Link>
+                <>
+                  <Link href={`/mis-cursos/${insc.curso.id}`}>
+                    <h2 className="text-xl font-semibold cursor-pointer hover:underline">{insc.curso.nombre}</h2>
+                  </Link>
+                  <Link href={`/mis-cursos/${insc.curso.id}`}>
+                    <button className="mt-2 bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800 text-sm">Ver exámenes</button>
+                  </Link>
+                  <Link href={`/dashboard/admin/examenes/${insc.curso.examen_id}/preguntas`}>
+                    <button className="mt-2 bg-green-700 text-white px-3 py-1 rounded hover:bg-green-800 text-sm ml-2">Gestionar Preguntas</button>
+                  </Link>
+                </>
               ) : (
                 <h2 className="text-xl font-semibold">{insc.curso.nombre}</h2>
               )}

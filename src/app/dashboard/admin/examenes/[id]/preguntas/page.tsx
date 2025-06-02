@@ -35,6 +35,7 @@ export default function PreguntasPage() {
     const token = localStorage.getItem("token");
     const res = await api.get(`/preguntas?examen_id=${id}`, { headers: { Authorization: `Bearer ${token}` } });
     setPreguntas(res.data);
+    console.log('Preguntas:', res.data);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -109,17 +110,33 @@ export default function PreguntasPage() {
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Preguntas del Examen</h1>
       <button className="mb-4 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800" onClick={() => { setShowModal(true); setEditId(null); setEditPregunta({ texto: "" }); }}>Agregar Pregunta</button>
-      <ul className="mb-4">
-        {preguntas.map(p => (
-          <li key={p.id} className="mb-2 flex items-center gap-2">
-            <span>{p.texto}</span>
-            <button className="bg-yellow-500 text-white px-2 py-1 rounded text-xs" onClick={() => { setEditId(p.id); setEditPregunta(p); setShowModal(true); }}>Editar</button>
-            <button className="bg-red-600 text-white px-2 py-1 rounded text-xs" onClick={() => handleDelete(p.id)}>Eliminar</button>
-            <button className="bg-green-700 text-white px-2 py-1 rounded text-xs" onClick={() => cargarRespuestas(p.id)}>Respuestas</button>
-          </li>
-        ))}
-        {preguntas.length === 0 && <li className="text-gray-500">No hay preguntas.</li>}
-      </ul>
+      <table className="min-w-full bg-white border border-gray-300 mb-4">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="px-4 py-2 border-b text-left text-xs font-medium text-[#111] uppercase">ID</th>
+            <th className="px-4 py-2 border-b text-left text-xs font-medium text-[#111] uppercase">Texto</th>
+            <th className="px-4 py-2 border-b text-left text-xs font-medium text-[#111] uppercase w-56">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {preguntas.map(p => (
+            <tr key={p.id} className="hover:bg-gray-50">
+              <td className="px-4 py-2 border-b text-[#111]">{p.id}</td>
+              <td className="px-4 py-2 border-b text-[#111]">{p.texto}</td>
+              <td className="px-4 py-2 border-b text-[#111]">
+                <div className="flex flex-row gap-1">
+                  <button className="bg-yellow-500 text-white px-2 py-1 rounded text-xs" onClick={() => { setEditId(p.id); setEditPregunta(p); setShowModal(true); }}>EDITAR-PRUEBA</button>
+                  <button className="bg-red-600 text-white px-2 py-1 rounded text-xs" onClick={() => handleDelete(p.id)}>Eliminar</button>
+                  <button className="bg-green-700 text-white px-2 py-1 rounded text-xs" style={{ border: '2px solid black' }} onClick={() => cargarRespuestas(p.id)}>Respuestas</button>
+                </div>
+              </td>
+            </tr>
+          ))}
+          {preguntas.length === 0 && (
+            <tr><td colSpan={3} className="text-gray-500 px-4 py-2">No hay preguntas.</td></tr>
+          )}
+        </tbody>
+      </table>
       <button className="mt-4 bg-gray-500 text-white px-4 py-2 rounded" onClick={() => router.back()}>Volver</button>
       {msg && <div className="mt-4 text-green-700">{msg}</div>}
       {/* Modal Pregunta */}
@@ -175,6 +192,7 @@ export default function PreguntasPage() {
           </div>
         </div>
       )}
+      <h2 className="text-red-600 font-bold">PRUEBA BOTÓN RESPUESTAS</h2>
     </div>
   );
 } 

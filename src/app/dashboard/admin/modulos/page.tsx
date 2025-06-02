@@ -194,23 +194,23 @@ export default function ModulosAdmin() {
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr className="bg-gray-100">
-              <th className="px-6 py-3 border-b text-left">ID</th>
-              <th className="px-6 py-3 border-b text-left">Nombre</th>
-              <th className="px-6 py-3 border-b text-left">Curso</th>
-              <th className="px-6 py-3 border-b text-left">Orden</th>
-              <th className="px-6 py-3 border-b text-left">Acciones</th>
+              <th className="px-6 py-3 border-b text-left text-xs font-medium text-[#111] uppercase bg-gray-100">ID</th>
+              <th className="px-6 py-3 border-b text-left text-xs font-medium text-[#111] uppercase bg-gray-100">Nombre</th>
+              <th className="px-6 py-3 border-b text-left text-xs font-medium text-[#111] uppercase bg-gray-100">Curso</th>
+              <th className="px-6 py-3 border-b text-left text-xs font-medium text-[#111] uppercase bg-gray-100">Orden</th>
+              <th className="px-6 py-3 border-b text-left text-xs font-medium text-[#111] uppercase bg-gray-100">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {modulos.map((modulo) => (
               <tr key={modulo.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 border-b">{modulo.id}</td>
-                <td className="px-6 py-4 border-b">{modulo.nombre}</td>
-                <td className="px-6 py-4 border-b">
+                <td className="px-6 py-4 border-b text-[#111]">{modulo.id}</td>
+                <td className="px-6 py-4 border-b text-[#111]">{modulo.nombre}</td>
+                <td className="px-6 py-4 border-b text-[#111]">
                   {cursos.find(c => c.id === modulo.curso_id)?.nombre || 'N/A'}
                 </td>
-                <td className="px-6 py-4 border-b">{modulo.orden}</td>
-                <td className="px-6 py-4 border-b">
+                <td className="px-6 py-4 border-b text-[#111]">{modulo.orden}</td>
+                <td className="px-6 py-4 border-b text-[#111]">
                   <button
                     onClick={() => handleEdit(modulo)}
                     className="bg-yellow-500 text-white px-3 py-1 rounded mr-2 hover:bg-yellow-600"
