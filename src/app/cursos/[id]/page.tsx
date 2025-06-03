@@ -174,11 +174,11 @@ export default function CursoDetallePage() {
         {/* Columna izquierda */}
         <div className="flex-1">
           <h1 className="text-2xl font-bold mb-2">{curso.nombre}</h1>
-          <p className="mb-4 text-gray-700">{curso.descripcion}</p>
+          <p className="mb-4 text-black">{curso.descripcion}</p>
           <h2 className="font-semibold mb-2">Contenido</h2>
           <div className="mb-6">
             {curso.modulos && curso.modulos.length > 0 ? (
-              <ul className="text-gray-800">
+              <ul className="text-black">
                 {curso.modulos.map((modulo) => (
                   <li key={modulo.id} className="mb-2">
                     <button
@@ -190,7 +190,7 @@ export default function CursoDetallePage() {
                       {modulo.nombre}
                     </button>
                     {openModulos.includes(modulo.id) && modulo.subtemas && modulo.subtemas.length > 0 && (
-                      <ul className="ml-6 list-none text-gray-600 mt-1">
+                      <ul className="ml-6 list-none text-black mt-1">
                         {modulo.subtemas.map((subtema) => (
                           <li key={subtema.id} className="mb-1 flex items-center">
                             <span className="mr-2">📄</span>{subtema.nombre}
@@ -202,7 +202,7 @@ export default function CursoDetallePage() {
                 ))}
               </ul>
             ) : (
-              <div className="text-gray-500">No hay módulos registrados.</div>
+              <div className="text-black">No hay módulos registrados.</div>
             )}
           </div>
           <button
@@ -269,7 +269,7 @@ export default function CursoDetallePage() {
         />
       )}
       <h1 className="text-3xl font-bold mb-2">{curso.nombre}</h1>
-      <p className="mb-4">{curso.descripcion}</p>
+      <p className="mb-4 text-black">{curso.descripcion}</p>
       <div className="mb-4 flex gap-4">
         <span className="font-bold text-blue-600">S/. {curso.precio}</span>
         <span className="text-sm text-gray-500">{curso.horas} horas</span>
