@@ -53,6 +53,7 @@ export default function ExamenPage() {
   const [resultado, setResultado] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
+  const [aprobado, setAprobado] = useState(false);
 
   useEffect(() => {
     api.get(`/examenes/examenes/${examen_id}`)
@@ -60,6 +61,13 @@ export default function ExamenPage() {
       .catch(() => setMsg("No se pudo cargar el examen"))
       .finally(() => setLoading(false));
   }, [examen_id]);
+
+  useEffect(() => {
+    // Si ya hay un intento aprobado, bloquear reintentos
+    api.get(`/examenes/examenes/${examen_id}/mis-intentos`).then(res => {
+      if (res.data.some((i: any) => i.aprobado)) setAprobado(true);
+    });
+  }, [examen_id, resultado]);
 
   const handleChange = (preguntaId: number, respuestaId: number) => {
     setRespuestas(prev => ({ ...prev, [preguntaId]: respuestaId }));
@@ -77,6 +85,7 @@ export default function ExamenPage() {
     try {
       const res = await api.post(`/examenes/examenes/${examen_id}/responder`, body);
       setResultado(res.data);
+      if (res.data.aprobado) setAprobado(true);
     } catch {
       setMsg("No se pudo enviar el examen");
     }
@@ -95,9 +104,30 @@ export default function ExamenPage() {
           <p className="font-semibold">Resultado:</p>
           <p>Correctas: {resultado.correctas} de {resultado.total}</p>
           <p>Porcentaje: {resultado.porcentaje}%</p>
-          <p className={resultado.aprobado ? "text-green-700" : "text-red-700"}>
-            {resultado.aprobado ? "¡Aprobado!" : "No aprobado"}
+          <p className={resultado.aprobado ? "text-green-700 font-bold" : "text-red-700 font-bold"}>
+            {resultado.aprobado ? "¡Aprobado! Ya puedes descargar tu certificado si tu curso lo permite." : "No aprobado"}
           </p>
+          {/* Feedback detallado por pregunta */}
+          <div className="mt-4">
+            <h3 className="font-semibold mb-2">Detalle de tus respuestas:</h3>
+            <ul className="space-y-2">
+              {resultado.detalle?.map((d: any, idx: number) => (
+                <li key={idx} className="border rounded p-2 bg-white">
+                  <div className="font-semibold">{d.texto}</div>
+                  <div>
+                    Tu respuesta: <span className={d.es_correcta ? "text-green-700 font-bold" : "text-red-700 font-bold"}>{d.respuesta_seleccionada || "Sin respuesta"}</span>
+                  </div>
+                  {!d.es_correcta && (
+                    <div>Respuesta correcta: <span className="text-green-700 font-bold">{d.respuesta_correcta}</span></div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : aprobado ? (
+        <div className="bg-green-100 p-4 rounded mb-4">
+          <p className="font-semibold text-green-700">Ya aprobaste este examen. Puedes descargar tu certificado si tu curso lo permite.</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
