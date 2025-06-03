@@ -35,7 +35,8 @@ interface Examen {
   porcentaje_aprob: number;
 }
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const backendUrl = apiUrl.replace(/\/api$/, '');
 
 export default function CursoDetallePage() {
   const { id } = useParams<{ id: string }>();
@@ -145,6 +146,27 @@ export default function CursoDetallePage() {
     return <GestionExamenes cursoId={curso.id} router={router} />;
   }
 
+  // Lógica para la imagen (coloca esto antes del return principal, después de obtener el curso)
+  const imagenes = [
+    '/imagenes/curso_1.jpg',
+    '/imagenes/curso_2.jpg',
+    '/imagenes/curso_3.jpg',
+    '/imagenes/curso_4.jpg',
+    '/imagenes/curso_5.jpg',
+    '/imagenes/curso_6.jpg',
+    '/imagenes/curso_7.jpg',
+    '/imagenes/curso_8.jpg',
+  ];
+  let imgSrc = imagenes[(curso.id - 1) % imagenes.length];
+  if (curso.imagen_url && curso.imagen_url.trim() !== '') {
+    if (
+      curso.imagen_url.startsWith('/imagenes/') ||
+      curso.imagen_url.startsWith('http')
+    ) {
+      imgSrc = curso.imagen_url;
+    }
+  }
+
   // --- NUEVO DISEÑO PARA USUARIO ---
   if (user?.rol !== 'admin') {
     return (
@@ -200,13 +222,16 @@ export default function CursoDetallePage() {
         </div>
         {/* Columna derecha */}
         <div className="w-full md:w-80 flex flex-col items-center">
-          {curso.imagen_url && (
-            <img
-              src={curso.imagen_url}
-              alt={curso.nombre}
-              className="w-80 h-44 object-cover rounded mb-4"
-            />
-          )}
+          <img
+            src={imgSrc}
+            alt={curso.nombre}
+            className="w-80 h-44 object-cover rounded mb-4"
+            onError={e => {
+              if (!e.currentTarget.src.endsWith('/imagenes/curso_1.jpg')) {
+                e.currentTarget.src = '/imagenes/curso_1.jpg';
+              }
+            }}
+          />
           <table className="w-full text-sm border">
             <tbody>
               <tr>
@@ -232,7 +257,16 @@ export default function CursoDetallePage() {
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded shadow">
       {curso.imagen_url && (
-        <img src={curso.imagen_url} alt={curso.nombre} className="w-full h-56 object-cover rounded mb-4" />
+        <img
+          src={imgSrc}
+          alt={curso.nombre}
+          className="w-full h-56 object-cover rounded mb-4"
+          onError={e => {
+            if (!e.currentTarget.src.endsWith('/imagenes/curso_1.jpg')) {
+              e.currentTarget.src = '/imagenes/curso_1.jpg';
+            }
+          }}
+        />
       )}
       <h1 className="text-3xl font-bold mb-2">{curso.nombre}</h1>
       <p className="mb-4">{curso.descripcion}</p>
@@ -295,7 +329,16 @@ export default function CursoDetallePage() {
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Imagen (URL)</label>
-                <input type="text" value={editData.imagen_url} onChange={e => setEditData({ ...editData, imagen_url: e.target.value })} className="w-full p-2 border rounded" />
+                <input
+                  type="text"
+                  value={editData.imagen_url}
+                  onChange={e => setEditData({ ...editData, imagen_url: e.target.value })}
+                  className="w-full p-2 border rounded"
+                  placeholder="Ej: /imagenes/mi-curso.png"
+                />
+                {editData.imagen_url && (
+                  <div className="mt-2"><img src={editData.imagen_url} alt="Vista previa" className="max-h-32 rounded" /></div>
+                )}
               </div>
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={() => { setShowEdit(false); router.replace(`/cursos/${id}`); }} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancelar</button>

@@ -130,40 +130,69 @@ export default function CursosPage() {
               <div>Cargando...</div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {cursosFiltrados.map(curso => (
-                  <div key={curso.id} className="border rounded-lg bg-white shadow hover:shadow-lg cursor-pointer transition relative flex flex-col">
-                    <Link href={`/cursos/${curso.id}`} className="flex-1 flex flex-col">
-                      {curso.imagen_url && (
-                        <img src={curso.imagen_url} alt={curso.nombre} className="w-full h-40 object-cover rounded-t mb-2" />
-                      )}
-                      <div className="flex-1 flex flex-col p-3">
-                        <h2 className="text-lg font-semibold mb-1 line-clamp-2">{curso.nombre}</h2>
-                        <p className="text-gray-600 text-sm mb-2 line-clamp-3">{curso.descripcion}</p>
-                        <div className="mt-auto flex flex-col gap-1">
-                          <span className="font-bold text-blue-600">S/. {curso.precio}</span>
-                          <span className="text-xs text-gray-500">{curso.horas} horas</span>
-                          {curso.categoria?.nombre && <span className="text-xs text-gray-400">{curso.categoria.nombre}</span>}
+                {cursosFiltrados.map((curso, idx) => {
+                  // Asignar una imagen de las 8 disponibles
+                  const imagenes = [
+                    '/imagenes/curso_1.jpg',
+                    '/imagenes/curso_2.jpg',
+                    '/imagenes/curso_3.jpg',
+                    '/imagenes/curso_4.jpg',
+                    '/imagenes/curso_5.jpg',
+                    '/imagenes/curso_6.jpg',
+                    '/imagenes/curso_7.jpg',
+                    '/imagenes/curso_8.jpg',
+                  ];
+                  let imgSrc = imagenes[(curso.id - 1) % imagenes.length];
+                  if (curso.imagen_url && curso.imagen_url.trim() !== '') {
+                    if (
+                      curso.imagen_url.startsWith('/imagenes/') ||
+                      curso.imagen_url.startsWith('http')
+                    ) {
+                      imgSrc = curso.imagen_url;
+                    }
+                  }
+                  return (
+                    <div key={curso.id} className="border rounded-lg bg-white shadow hover:shadow-lg cursor-pointer transition relative flex flex-col">
+                      <Link href={`/cursos/${curso.id}`} className="flex-1 flex flex-col">
+                        <img
+                          src={imgSrc}
+                          alt={curso.nombre}
+                          className="w-full h-40 object-cover rounded-t mb-2"
+                          onError={e => {
+                            if (!e.currentTarget.src.endsWith('/imagenes/curso_1.jpg')) {
+                              e.currentTarget.src = '/imagenes/curso_1.jpg';
+                            }
+                          }}
+                        />
+                        <div className="flex-1 flex flex-col p-3">
+                          <h2 className="text-lg font-semibold mb-1 line-clamp-2">{curso.nombre}</h2>
+                          <p className="text-gray-600 text-sm mb-2 line-clamp-3">{curso.descripcion}</p>
+                          <div className="mt-auto flex flex-col gap-1">
+                            <span className="font-bold text-blue-600">S/. {curso.precio}</span>
+                            <span className="text-xs text-gray-500">{curso.horas} horas</span>
+                            {curso.categoria?.nombre && <span className="text-xs text-gray-400">{curso.categoria.nombre}</span>}
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                    {user?.rol === 'admin' && (
-                      <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
-                        <button onClick={async () => {
-                          if (!window.confirm('¿Eliminar este curso?')) return;
-                          try {
-                            await api.delete(`/cursos/${curso.id}`);
-                            setCursos(cursos.filter(c => c.id !== curso.id));
-                          } catch {
-                            alert('Error al eliminar curso');
-                          }
-                        }} className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-800">Eliminar</button>
-                        <Link href={`/cursos/${curso.id}?edit=1`} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600 text-center">Editar</Link>
-                        <Link href={`/cursos/${curso.id}?tab=materiales`} className="bg-blue-700 text-white px-2 py-1 rounded text-xs hover:bg-blue-800 text-center">Materiales</Link>
-                        <Link href={`/cursos/${curso.id}?tab=examenes`} className="bg-green-700 text-white px-2 py-1 rounded text-xs hover:bg-green-800 text-center">Exámenes</Link>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      </Link>
+                      {user?.rol === 'admin' && (
+                        <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
+                          <button onClick={async () => {
+                            if (!window.confirm('¿Eliminar este curso?')) return;
+                            try {
+                              await api.delete(`/cursos/${curso.id}`);
+                              setCursos(cursos.filter(c => c.id !== curso.id));
+                            } catch {
+                              alert('Error al eliminar curso');
+                            }
+                          }} className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-800">Eliminar</button>
+                          <Link href={`/cursos/${curso.id}?edit=1`} className="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600 text-center">Editar</Link>
+                          <Link href={`/cursos/${curso.id}?tab=materiales`} className="bg-blue-700 text-white px-2 py-1 rounded text-xs hover:bg-blue-800 text-center">Materiales</Link>
+                          <Link href={`/cursos/${curso.id}?tab=examenes`} className="bg-green-700 text-white px-2 py-1 rounded text-xs hover:bg-green-800 text-center">Exámenes</Link>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
                 {cursosFiltrados.length === 0 && (
                   <div className="col-span-full text-gray-500 text-center py-12">No se encontraron cursos.</div>
                 )}

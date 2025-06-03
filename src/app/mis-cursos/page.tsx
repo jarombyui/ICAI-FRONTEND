@@ -22,6 +22,8 @@ type Inscripcion = {
 export default function MisCursosPage() {
   const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [certificados, setCertificados] = useState<{ curso_id: number; url_pdf: string }[]>([]);
+  const [msg, setMsg] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -30,49 +32,104 @@ export default function MisCursosPage() {
       .then(res => setInscripciones(res.data))
       .catch(() => setInscripciones([]))
       .finally(() => setLoading(false));
+    // Obtener certificados del usuario
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      api.get(`/certificados/usuario/${payload.id}`)
+        .then(res => setCertificados(res.data))
+        .catch(() => setCertificados([]));
+    } catch {}
   }, []);
 
+  const handleDescargarCertificado = async (curso_id: number) => {
+    setMsg('');
+    try {
+      // 1. Emitir certificado (por si no existe)
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setMsg('Debes iniciar sesión.');
+        return;
+      }
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      await api.post('/certificados/emitir', { usuario_id: payload.id, curso_id });
+      // 2. Descargar certificado
+      const res = await api.get(`/certificados/descargar/${curso_id}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `certificado_${curso_id}.pdf`;
+      a.click();
+      setMsg('Certificado generado y descargado correctamente.');
+    } catch (err: any) {
+      setMsg(err?.response?.data?.error || 'No se pudo generar o descargar el certificado');
+    }
+  };
+
+  const handleEliminarInscripcion = async (inscripcion_id: number) => {
+    if (!window.confirm('¿Eliminar inscripción?')) return;
+    try {
+      await api.delete(`/inscripciones/${inscripcion_id}`);
+      setInscripciones(inscripciones.filter(i => i.id !== inscripcion_id));
+    } catch {
+      setMsg('No se pudo eliminar la inscripción');
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto mt-10">
+    <div className="max-w-5xl mx-auto mt-10">
       <h1 className="text-2xl font-bold mb-6">Mis Cursos</h1>
+      {msg && <div className="mb-4 text-green-700">{msg}</div>}
       {loading ? (
         <div>Cargando...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {inscripciones.map(insc => (
-            <div key={insc.id} className="border rounded p-4 bg-white shadow">
-              {insc.estado === 'comprado' ? (
-                <>
-                  <Link href={`/mis-cursos/${insc.curso.id}`}>
-                    <h2 className="text-xl font-semibold cursor-pointer hover:underline">{insc.curso.nombre}</h2>
-                  </Link>
-                  <Link href={`/mis-cursos/${insc.curso.id}`}>
-                    <button className="mt-2 bg-blue-700 text-white px-3 py-1 rounded hover:bg-blue-800 text-sm">Ver exámenes</button>
-                  </Link>
-                  <Link href={`/dashboard/admin/examenes/${insc.curso.examen_id}/preguntas`}>
-                    <button className="mt-2 bg-green-700 text-white px-3 py-1 rounded hover:bg-green-800 text-sm ml-2">Gestionar Preguntas</button>
-                  </Link>
-                </>
-              ) : (
-                <h2 className="text-xl font-semibold">{insc.curso.nombre}</h2>
-              )}
-              <p className="text-gray-600">{insc.curso.descripcion}</p>
-              <div className="mt-2 flex justify-between items-center">
-                <span className="font-bold text-blue-600">S/. {insc.curso.precio}</span>
-                <span className="text-sm text-gray-500">{insc.curso.horas} horas</span>
-              </div>
-              <div className="mt-2 flex items-center gap-2">
-                <span className={`px-2 py-1 rounded text-xs ${insc.estado === 'comprado' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>{insc.estado}</span>
-                {insc.estado === 'pendiente' && (
-                  <Link href={`/pago/${insc.id}`}>
-                    <button className="ml-2 bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">
-                      Pagar
+        <div className="bg-white rounded shadow p-4">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left py-2 px-4">Curso</th>
+                <th className="text-left py-2 px-4">Descripción</th>
+                <th className="text-left py-2 px-4">Estado</th>
+                <th className="text-left py-2 px-4">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inscripciones.map(insc => (
+                <tr key={insc.id} className="border-b hover:bg-gray-50">
+                  <td className="py-2 px-4 font-semibold">
+                    <Link href={`/mis-cursos/${insc.curso.id}`}
+                      className="block transition rounded px-1 py-1 focus:outline-none"
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
+                      <span className="block rounded px-1 py-1 cursor-pointer hover:bg-gray-200 transition">
+                        {insc.curso.nombre}
+                      </span>
+                    </Link>
+                  </td>
+                  <td className="py-2 px-4 text-gray-600">{insc.curso.descripcion}</td>
+                  <td className="py-2 px-4">
+                    <span className={`px-2 py-1 rounded text-xs ${insc.estado === 'comprado' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>{insc.estado}</span>
+                  </td>
+                  <td className="py-2 px-4 flex gap-2 items-center">
+                    {/* Descargar certificado si existe */}
+                    {insc.estado === 'comprado' && certificados.some(c => c.curso_id === insc.curso.id) && (
+                      <button
+                        className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
+                        onClick={() => handleDescargarCertificado(insc.curso.id)}
+                      >
+                        Descargar Certificado
+                      </button>
+                    )}
+                    <button
+                      className="text-red-600 hover:underline text-xs"
+                      onClick={() => handleEliminarInscripcion(insc.id)}
+                    >
+                      Eliminar inscripción
                     </button>
-                  </Link>
-                )}
-              </div>
-            </div>
-          ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
