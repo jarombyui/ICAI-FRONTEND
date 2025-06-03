@@ -46,6 +46,7 @@ export default function CursoDetallePage() {
   const [showEdit, setShowEdit] = useState(false);
   const [editData, setEditData] = useState({ nombre: '', descripcion: '', precio: 0, horas: 0, imagen_url: '' });
   const [saving, setSaving] = useState(false);
+  const [inscrito, setInscrito] = useState(false);
 
   useEffect(() => {
     api.get(`/cursos/${id}`)
@@ -63,7 +64,16 @@ export default function CursoDetallePage() {
         } catch {}
       }
     }
-  }, []);
+    // Verificar si el usuario ya está inscrito en el curso
+    const token = localStorage.getItem('token');
+    if (token) {
+      api.get('/inscripciones/mis').then(res => {
+        if (res.data.some((i: any) => i.curso.id === Number(id) && i.estado === 'comprado')) {
+          setInscrito(true);
+        }
+      });
+    }
+  }, [id]);
 
   // Detectar query params para mostrar edición, materiales o exámenes
   useEffect(() => {
@@ -154,10 +164,17 @@ export default function CursoDetallePage() {
         </div>
       )}
       <button
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        onClick={handleInscribirse}
+        className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ${inscrito ? 'opacity-50 cursor-not-allowed' : ''}`}
+        onClick={async () => {
+          if (inscrito) {
+            setMsg('Ya estás inscrito en este curso.');
+            return;
+          }
+          await handleInscribirse();
+        }}
+        disabled={inscrito}
       >
-        Inscribirse
+        {inscrito ? 'Ya inscrito' : 'Inscribirse'}
       </button>
       {msg && <div className="mt-4 text-green-700">{msg}</div>}
 

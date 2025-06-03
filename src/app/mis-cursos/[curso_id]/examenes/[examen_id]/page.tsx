@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import api from "@/utils/api";
+import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
+import { Dialog } from '@headlessui/react';
 
 function getUserId() {
   if (typeof window === 'undefined') return null;
@@ -54,6 +56,8 @@ export default function ExamenPage() {
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
   const [aprobado, setAprobado] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   useEffect(() => {
     api.get(`/examenes/examenes/${examen_id}`)
@@ -75,6 +79,13 @@ export default function ExamenPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowModal(true);
+    setPendingSubmit(true);
+  };
+
+  const confirmSubmit = async () => {
+    setShowModal(false);
+    setPendingSubmit(false);
     if (!examen) return;
     const body = {
       respuestas: Object.entries(respuestas).map(([pregunta_id, respuesta_id]) => ({
@@ -96,24 +107,40 @@ export default function ExamenPage() {
   if (!examen) return <div className="p-8">Examen no encontrado</div>;
 
   return (
-    <div className="max-w-2xl mx-auto mt-10">
-      <h1 className="text-2xl font-bold mb-6">{examen.nombre}</h1>
+    <div className="max-w-2xl mx-auto mt-10 px-4">
+      <div className="flex items-center gap-2 mb-6">
+        <CheckCircleIcon className="h-8 w-8 text-blue-700" />
+        <h1 className="text-2xl font-bold">{examen.nombre}</h1>
+      </div>
       <HistorialIntentos examenId={examen_id as string} />
       {resultado ? (
-        <div className="bg-green-100 p-4 rounded mb-4">
-          <p className="font-semibold">Resultado:</p>
-          <p>Correctas: {resultado.correctas} de {resultado.total}</p>
-          <p>Porcentaje: {resultado.porcentaje}%</p>
-          <p className={resultado.aprobado ? "text-green-700 font-bold" : "text-red-700 font-bold"}>
-            {resultado.aprobado ? "¡Aprobado! Ya puedes descargar tu certificado si tu curso lo permite." : "No aprobado"}
-          </p>
+        <div className="bg-green-50 border border-green-200 p-4 rounded mb-4 shadow">
+          <div className="flex items-center gap-2 mb-2">
+            {resultado.aprobado ? (
+              <CheckCircleIcon className="h-6 w-6 text-green-600" />
+            ) : (
+              <XCircleIcon className="h-6 w-6 text-red-600" />
+            )}
+            <span className={resultado.aprobado ? "text-green-700 font-bold" : "text-red-700 font-bold"}>
+              {resultado.aprobado ? "¡Aprobado! Ya puedes descargar tu certificado si tu curso lo permite." : "No aprobado"}
+            </span>
+          </div>
+          <p>Correctas: <span className="font-semibold">{resultado.correctas}</span> de {resultado.total}</p>
+          <p>Porcentaje: <span className="font-semibold">{resultado.porcentaje}%</span></p>
           {/* Feedback detallado por pregunta */}
           <div className="mt-4">
             <h3 className="font-semibold mb-2">Detalle de tus respuestas:</h3>
             <ul className="space-y-2">
               {resultado.detalle?.map((d: any, idx: number) => (
-                <li key={idx} className="border rounded p-2 bg-white">
-                  <div className="font-semibold">{d.texto}</div>
+                <li key={idx} className="border rounded p-2 bg-white flex flex-col gap-1">
+                  <div className="font-semibold flex items-center gap-2">
+                    {d.es_correcta ? (
+                      <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <XCircleIcon className="h-5 w-5 text-red-600" />
+                    )}
+                    {d.texto}
+                  </div>
                   <div>
                     Tu respuesta: <span className={d.es_correcta ? "text-green-700 font-bold" : "text-red-700 font-bold"}>{d.respuesta_seleccionada || "Sin respuesta"}</span>
                   </div>
@@ -126,24 +153,28 @@ export default function ExamenPage() {
           </div>
         </div>
       ) : aprobado ? (
-        <div className="bg-green-100 p-4 rounded mb-4">
+        <div className="bg-green-50 border border-green-200 p-4 rounded mb-4 shadow flex items-center gap-2">
+          <CheckCircleIcon className="h-6 w-6 text-green-600" />
           <p className="font-semibold text-green-700">Ya aprobaste este examen. Puedes descargar tu certificado si tu curso lo permite.</p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {examen.preguntas.map((pregunta: any) => (
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded shadow border">
+          {examen.preguntas.map((pregunta: any, idx: number) => (
             <div key={pregunta.id} className="mb-4">
-              <p className="font-semibold mb-2">{pregunta.texto}</p>
-              <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-xs font-bold">{idx + 1}</span>
+                <p className="font-semibold">{pregunta.texto}</p>
+              </div>
+              <div className="space-y-1 ml-6">
                 {pregunta.respuestas.map((respuesta: any) => (
-                  <label key={respuesta.id} className="block">
+                  <label key={respuesta.id} className="block cursor-pointer hover:bg-blue-50 rounded px-2 py-1">
                     <input
                       type="radio"
                       name={`pregunta_${pregunta.id}`}
                       value={respuesta.id}
                       checked={respuestas[pregunta.id] === respuesta.id}
                       onChange={() => handleChange(pregunta.id, respuesta.id)}
-                      className="mr-2"
+                      className="mr-2 accent-blue-700"
                       required
                     />
                     {respuesta.texto}
@@ -152,9 +183,24 @@ export default function ExamenPage() {
               </div>
             </div>
           ))}
-          <button type="submit" className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">Enviar examen</button>
+          <button type="submit" className="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800 font-semibold flex items-center gap-2">
+            <ExclamationTriangleIcon className="h-5 w-5 text-white" /> Enviar examen
+          </button>
         </form>
       )}
+      {/* Modal de confirmación al enviar examen */}
+      <Dialog open={showModal} onClose={() => setShowModal(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <Dialog.Panel className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl">
+            <Dialog.Title className="text-lg font-bold mb-2">¿Enviar examen?</Dialog.Title>
+            <Dialog.Description className="mb-4">¿Estás seguro de que quieres enviar tus respuestas? No podrás cambiarlas después.</Dialog.Description>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowModal(false)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Cancelar</button>
+              <button onClick={confirmSubmit} disabled={!pendingSubmit} className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">Enviar</button>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
     </div>
   );
 } 
