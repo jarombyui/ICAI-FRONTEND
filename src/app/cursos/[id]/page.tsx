@@ -10,12 +10,14 @@ type Curso = {
   precio: number;
   horas: number;
   imagen_url?: string;
+  modulos?: Modulo[];
 };
 
 // Tipos para materiales y exámenes
 interface Modulo {
   id: number;
   nombre: string;
+  subtemas?: Subtema[];
 }
 interface Subtema {
   id: number;
@@ -47,6 +49,13 @@ export default function CursoDetallePage() {
   const [editData, setEditData] = useState({ nombre: '', descripcion: '', precio: 0, horas: 0, imagen_url: '' });
   const [saving, setSaving] = useState(false);
   const [inscrito, setInscrito] = useState(false);
+  // Estado acordeón módulos (debe estar aquí, no dentro de un if)
+  const [openModulos, setOpenModulos] = useState<number[]>([]);
+  const toggleModulo = (id: number) => {
+    setOpenModulos((prev) =>
+      prev.includes(id) ? prev.filter((mid) => mid !== id) : [...prev, id]
+    );
+  };
 
   useEffect(() => {
     api.get(`/cursos/${id}`)
@@ -136,6 +145,90 @@ export default function CursoDetallePage() {
     return <GestionExamenes cursoId={curso.id} router={router} />;
   }
 
+  // --- NUEVO DISEÑO PARA USUARIO ---
+  if (user?.rol !== 'admin') {
+    return (
+      <div className="max-w-6xl mx-auto mt-10 p-6 bg-white rounded shadow flex flex-col md:flex-row gap-8">
+        {/* Columna izquierda */}
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold mb-2">{curso.nombre}</h1>
+          <p className="mb-4 text-gray-700">{curso.descripcion}</p>
+          <h2 className="font-semibold mb-2">Contenido</h2>
+          <div className="mb-6">
+            {curso.modulos && curso.modulos.length > 0 ? (
+              <ul className="text-gray-800">
+                {curso.modulos.map((modulo) => (
+                  <li key={modulo.id} className="mb-2">
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 font-bold focus:outline-none hover:underline"
+                      onClick={() => toggleModulo(modulo.id)}
+                    >
+                      <span>{openModulos.includes(modulo.id) ? '▼' : '▶'}</span>
+                      {modulo.nombre}
+                    </button>
+                    {openModulos.includes(modulo.id) && modulo.subtemas && modulo.subtemas.length > 0 && (
+                      <ul className="ml-6 list-none text-gray-600 mt-1">
+                        {modulo.subtemas.map((subtema) => (
+                          <li key={subtema.id} className="mb-1 flex items-center">
+                            <span className="mr-2">📄</span>{subtema.nombre}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-gray-500">No hay módulos registrados.</div>
+            )}
+          </div>
+          <button
+            className={`w-full bg-blue-700 text-white py-2 rounded hover:bg-blue-800 ${inscrito ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={inscrito}
+            onClick={async () => {
+              if (inscrito) {
+                setMsg('Ya estás inscrito en este curso.');
+                return;
+              }
+              await handleInscribirse();
+            }}
+          >
+            {inscrito ? 'Ya inscrito' : `Inscríbete por S/. ${curso.precio}`}
+          </button>
+          {msg && <div className="mt-4 text-green-700">{msg}</div>}
+        </div>
+        {/* Columna derecha */}
+        <div className="w-full md:w-80 flex flex-col items-center">
+          {curso.imagen_url && (
+            <img
+              src={curso.imagen_url}
+              alt={curso.nombre}
+              className="w-80 h-44 object-cover rounded mb-4"
+            />
+          )}
+          <table className="w-full text-sm border">
+            <tbody>
+              <tr>
+                <td className="font-semibold border px-2 py-2">Certificación por</td>
+                <td className="border px-2 py-2">{curso.horas} horas</td>
+              </tr>
+              <tr>
+                <td className="font-semibold border px-2 py-2">Precio</td>
+                <td className="border px-2 py-2">S/. {curso.precio}</td>
+              </tr>
+              <tr>
+                <td className="font-semibold border px-2 py-2">Próximo inicio</td>
+                <td className="border px-2 py-2">Inicia y termina cuando quieras</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
+  // --- VISTA PARA ADMIN ---
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded shadow">
       {curso.imagen_url && (
