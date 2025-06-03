@@ -38,11 +38,19 @@ export default function Navbar() {
   return (
     <nav className="bg-blue-700 text-white px-6 py-3 flex justify-between items-center">
       <div className="flex gap-4">
-        <Link href="/cursos" className="font-bold hover:underline">Explorar cursos</Link>
-        {isAuth && <Link href="/mis-cursos" className="hover:underline">Mis cursos</Link>}
-        {isAuth && user?.rol === 'admin' && false && <Link href="/dashboard/admin/cursos" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cursos</Link>}
-        {isAuth && user?.rol === 'admin' && <Link href="/dashboard/admin/modulos" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Módulos</Link>}
-        {isAuth && user?.rol === 'admin' && <Link href="/dashboard/admin/examenes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Exámenes</Link>}
+        {isAuth && user?.rol === 'admin' ? (
+          <>
+            <Link href="/cursos" className="font-bold hover:underline">Explorar cursos</Link>
+            <Link href="/mis-cursos" className="font-bold hover:underline">Mis cursos</Link>
+            <Link href="/dashboard/admin/modulos" className="font-bold hover:underline">Módulos</Link>
+            <Link href="/dashboard/admin/examenes" className="font-bold hover:underline">Exámenes</Link>
+          </>
+        ) : (
+          <>
+            <Link href="/cursos" className="font-bold hover:underline">Explorar cursos</Link>
+            {isAuth && <Link href="/mis-cursos" className="hover:underline">Mis cursos</Link>}
+          </>
+        )}
       </div>
       <div>
         {isAuth ? (
