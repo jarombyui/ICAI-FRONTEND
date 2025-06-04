@@ -47,16 +47,30 @@ export default function Navbar() {
     }, 100);
   };
 
+  // --- LOGO CLICK HANDLER ---
+  const handleLogoClick = () => {
+    if (isAuth && user?.rol === 'admin') {
+      router.push('/dashboard/admin');
+    } else {
+      router.push('/mis-cursos');
+    }
+  };
+
   return (
-    <nav className="bg-white text-[#023474] px-6 flex justify-between items-center border-b border-gray-200 shadow-sm" style={{ minHeight: '90px' }}>
+    <nav className="bg-white text-[#023474] px-6 py-4 min-h-[90px] flex justify-between items-center border-b border-gray-200 shadow-sm">
       <div className="flex gap-6 items-center h-full">
-        <button onClick={() => router.push('/mis-cursos')} className="focus:outline-none flex items-center h-full">
+        <button
+          onClick={handleLogoClick}
+          className="focus:outline-none flex items-center h-full"
+          type="button"
+        >
           <Image src="/imagenes/logo/logo-icai.jpeg" alt="Logo" width={72} height={72} className="mr-2" priority style={{ height: '72px', width: 'auto' }} />
         </button>
         {isAuth && user?.rol === 'admin' ? (
           <>
             <Link href="/cursos" className="font-bold hover:underline">Explorar cursos</Link>
             <Link href="/mis-cursos" className="font-bold hover:underline">Mis cursos</Link>
+            <Link href="/dashboard/admin" className="font-bold hover:underline">Panel de Administrador</Link>
             <Link href="/dashboard/admin/modulos" className="font-bold hover:underline">Módulos</Link>
             <Link href="/dashboard/admin/examenes" className="font-bold hover:underline">Exámenes</Link>
           </>

@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import api from '@/utils/api';
 import Link from 'next/link';
 import Footer from '../../components/Footer';
+import { useRouter, useSearchParams } from 'next/navigation';
+import SecurityBanner from '../../components/SecurityBanner';
 
 type Curso = {
   id: number;
@@ -25,6 +27,9 @@ export default function MisCursosPage() {
   const [loading, setLoading] = useState(true);
   const [certificados, setCertificados] = useState<{ curso_id: number; url_pdf: string }[]>([]);
   const [msg, setMsg] = useState('');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -40,7 +45,17 @@ export default function MisCursosPage() {
         .then(res => setCertificados(res.data))
         .catch(() => setCertificados([]));
     } catch {}
-  }, []);
+
+    // Detectar si el usuario acaba de iniciar sesión por query param
+    if (searchParams.get('justLoggedIn') === 'true') {
+      setShowBanner(true);
+      // Limpiar el query param para que no se repita al refrescar
+      const params = new URLSearchParams(window.location.search);
+      params.delete('justLoggedIn');
+      const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams]);
 
   const handleDescargarCertificado = async (curso_id: number) => {
     setMsg('');
@@ -81,6 +96,7 @@ export default function MisCursosPage() {
       <div className="min-h-screen bg-white">
         <div className="max-w-5xl mx-auto mt-10">
           <h1 className="text-2xl font-bold mb-6 text-black">Mis Cursos</h1>
+          {showBanner && <SecurityBanner show={true} />}
           {msg && <div className="mb-4 text-green-700 font-semibold">{msg}</div>}
           {loading ? (
             <div className="text-black">Cargando...</div>
