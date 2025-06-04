@@ -35,7 +35,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row md:justify-between gap-8">
         <div>
           <img src="/imagenes/logo/logo-icai.jpeg" alt="Logo ICAI" className="h-10 mb-2" />
-          <div className="text-sm mb-2">CETPRO Instituto de Ciencias Emresariales e Ingeniería Aplicada</div>
+          <div className="text-sm mb-2">CETPRO Instituto de Ciencias Empresariales e Ingeniería Aplicada</div>
           <div className="text-xs mb-1">Amderson Cooworking, Miraflores, Lima Perú</div>
           <div className="text-xs mb-1">📞 +51 947726382</div>
           <div className="text-xs mb-1">✉️ contacto@icai.com</div>

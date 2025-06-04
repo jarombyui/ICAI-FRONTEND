@@ -102,11 +102,11 @@ export default function PagoPage() {
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-2">
       <div className="max-w-3xl mx-auto bg-white rounded shadow p-8">
-        <button onClick={() => router.back()} className="mb-4 text-blue-700 hover:underline flex items-center gap-2">← Completar compra</button>
-        <h1 className="text-xl font-bold mb-6">Completar compra</h1>
+        <button onClick={() => router.back()} className="mb-4 text-[#023474] hover:underline flex items-center gap-2 font-semibold">← Completar compra</button>
+        <h1 className="text-xl font-bold mb-6 text-black">Completar compra</h1>
         <div className="mb-8">
-          <h2 className="font-semibold mb-2">Resumen</h2>
-          <table className="w-full mb-4 border">
+          <h2 className="font-semibold mb-2 text-black">Resumen</h2>
+          <table className="w-full mb-4 border text-black">
             <tbody>
               <tr><td className="font-semibold">Programa</td><td>{inscripcion.curso.nombre}</td></tr>
               <tr><td className="font-semibold">Fecha inicio</td><td>{new Date().toLocaleDateString()}</td></tr>
@@ -116,25 +116,25 @@ export default function PagoPage() {
           </table>
         </div>
         <div className="mb-8">
-          <h2 className="font-semibold mb-2">Tramitar pago</h2>
+          <h2 className="font-semibold mb-2 text-black">Tramitar pago</h2>
           <div className="border rounded mb-4">
             <div className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex-1">
-                <label className="font-semibold">Pago manual: Envío de constancia de depósito</label>
-                <div className="mt-2 text-sm text-gray-600">Puedes pagar con Yape, Plin, transferencia bancaria, etc. Sube la imagen del comprobante.</div>
+                <label className="font-semibold text-black">Pago manual: Envío de constancia de depósito</label>
+                <div className="mt-2 text-sm text-black">Puedes pagar con Yape, Plin, transferencia bancaria, etc. Sube la imagen del comprobante.</div>
                 <div className="flex gap-4 mt-2">
                   <div className="flex flex-col items-center">
                     <Image src="/imagenes/qr/qr-yape.png" alt="QR Yape" width={100} height={100} className="rounded" />
-                    <span className="text-xs mt-1">Yape</span>
+                    <span className="text-xs mt-1 text-black">Yape</span>
                   </div>
                   <div className="flex flex-col items-center">
                     <Image src="/imagenes/qr/qr-plin.png" alt="QR Plin" width={100} height={100} className="rounded" />
-                    <span className="text-xs mt-1">Plin</span>
+                    <span className="text-xs mt-1 text-black">Plin</span>
                   </div>
                 </div>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <label className="border-dashed border-2 border-gray-400 rounded p-4 cursor-pointer w-40 h-40 flex flex-col items-center justify-center text-gray-500 hover:border-blue-600">
+                <label className="border-dashed border-2 border-gray-400 rounded p-4 cursor-pointer w-40 h-40 flex flex-col items-center justify-center text-gray-700 hover:border-blue-600">
                   +Cargar imagen
                   <input
                     type="file"
@@ -145,7 +145,7 @@ export default function PagoPage() {
                 </label>
                 {comprobante && <span className="text-xs text-green-700">{comprobante.name}</span>}
                 <button
-                  className="bg-gray-700 text-white px-4 py-2 rounded mt-2 disabled:opacity-50"
+                  className="bg-[#023474] text-white px-4 py-2 rounded mt-2 disabled:opacity-50 font-semibold"
                   disabled={!comprobante || enviando}
                   onClick={handleEnviarComprobante}
                 >
@@ -154,7 +154,7 @@ export default function PagoPage() {
               </div>
             </div>
           </div>
-          <div className="text-xs text-gray-500 mt-2">
+          <div className="text-xs text-gray-700 mt-2">
             Al hacer clic en "ENVIAR CONSTANCIA" aceptas nuestros Términos y condiciones
           </div>
         </div>

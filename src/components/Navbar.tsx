@@ -39,10 +39,10 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-blue-700 text-white px-6 py-3 flex justify-between items-center">
+    <nav className="bg-white text-[#023474] px-6 py-3 flex justify-between items-center border-b border-gray-200 shadow-sm">
       <div className="flex gap-4 items-center">
         <button onClick={() => router.push('/mis-cursos')} className="focus:outline-none">
-          <Image src="/imagenes/logo/logo-icai.jpeg" alt="Logo" width={48} height={48} className="mr-2" />
+          <Image src="/imagenes/logo/logo-icai.jpeg" alt="Logo" width={72} height={72} className="mr-2" />
         </button>
         {isAuth && user?.rol === 'admin' ? (
           <>
@@ -54,7 +54,7 @@ export default function Navbar() {
         ) : (
           <>
             <Link href="/cursos" className="font-bold hover:underline">Explorar cursos</Link>
-            {isAuth && <Link href="/mis-cursos" className="hover:underline">Mis cursos</Link>}
+            {isAuth && <Link href="/mis-cursos" className="font-bold hover:underline">Mis cursos</Link>}
           </>
         )}
       </div>
@@ -62,7 +62,7 @@ export default function Navbar() {
         {isAuth ? (
           <div className="relative">
             <button
-              className="flex items-center gap-2 bg-blue-900 px-3 py-1 rounded hover:bg-blue-800 focus:outline-none"
+              className="flex items-center gap-2 bg-[#023474] text-white px-3 py-1 rounded hover:bg-[#23386f] focus:outline-none"
               onClick={() => setShowMenu(v => !v)}
               onBlur={() => setTimeout(() => setShowMenu(false), 150)}
             >
@@ -85,7 +85,7 @@ export default function Navbar() {
             )}
           </div>
         ) : (
-          <Link href="/auth" className="bg-white text-blue-700 px-3 py-1 rounded hover:bg-gray-200">Login / Registro</Link>
+          <Link href="/auth" className="bg-[#023474] text-white px-3 py-1 rounded hover:bg-[#23386f]">Login / Registro</Link>
         )}
       </div>
     </nav>

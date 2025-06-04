@@ -82,10 +82,27 @@ export default function CursosPage() {
   };
 
   // Filtrado por búsqueda
-  const cursosFiltrados = cursos.filter(curso => {
+  let cursosFiltrados = cursos.filter(curso => {
     const texto = `${curso.nombre} ${curso.descripcion} ${curso.categoria?.nombre || ''}`.toLowerCase();
+    // Filtros visuales
+    if (filtros['modalidad'] && !/auto.?instructivo/i.test(texto)) return false;
+    if (filtros['tipo'] && !/capacitaci[oó]n/i.test(texto)) return false;
+    if (filtros['area_admin'] && !/administraci[oó]n/i.test(texto)) return false;
+    if (filtros['area_derecho'] && !/derecho/i.test(texto)) return false;
     return texto.includes(search.toLowerCase());
   });
+  // Filtrado por precio
+  if (filtroPrecio) {
+    if (filtroPrecio === '0-50') cursosFiltrados = cursosFiltrados.filter(c => c.precio >= 0 && c.precio <= 50);
+    if (filtroPrecio === '51-100') cursosFiltrados = cursosFiltrados.filter(c => c.precio >= 51 && c.precio <= 100);
+    if (filtroPrecio === '101+') cursosFiltrados = cursosFiltrados.filter(c => c.precio >= 101);
+  }
+  // Filtrado por duración
+  if (filtroDuracion) {
+    if (filtroDuracion === '0-10') cursosFiltrados = cursosFiltrados.filter(c => c.horas >= 0 && c.horas <= 10);
+    if (filtroDuracion === '11-20') cursosFiltrados = cursosFiltrados.filter(c => c.horas >= 11 && c.horas <= 20);
+    if (filtroDuracion === '21+') cursosFiltrados = cursosFiltrados.filter(c => c.horas >= 21);
+  }
 
   const totalPaginas = Math.ceil(cursosFiltrados.length / cursosPorPagina);
   const cursosPagina = cursosFiltrados.slice((pagina - 1) * cursosPorPagina, pagina * cursosPorPagina);
@@ -126,16 +143,16 @@ export default function CursosPage() {
                 <h2 className="text-lg font-bold mb-2 text-black">Filtrar por</h2>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-black">
-                    <input type="checkbox" className="accent-blue-700" disabled /> Modalidad: auto-instructivo
+                    <input type="checkbox" className="accent-blue-700" checked={!!filtros['modalidad']} onChange={e => setFiltros(f => ({ ...f, modalidad: e.target.checked }))} /> Modalidad: auto-instructivo
                   </label>
                   <label className="flex items-center gap-2 text-black">
-                    <input type="checkbox" className="accent-blue-700" disabled /> Tipo: curso de capacitación
+                    <input type="checkbox" className="accent-blue-700" checked={!!filtros['tipo']} onChange={e => setFiltros(f => ({ ...f, tipo: e.target.checked }))} /> Tipo: curso de capacitación
                   </label>
                   <label className="flex items-center gap-2 text-black">
-                    <input type="checkbox" className="accent-blue-700" disabled /> Área: administración
+                    <input type="checkbox" className="accent-blue-700" checked={!!filtros['area_admin']} onChange={e => setFiltros(f => ({ ...f, area_admin: e.target.checked }))} /> Área: administración
                   </label>
                   <label className="flex items-center gap-2 text-black">
-                    <input type="checkbox" className="accent-blue-700" disabled /> Área: derecho
+                    <input type="checkbox" className="accent-blue-700" checked={!!filtros['area_derecho']} onChange={e => setFiltros(f => ({ ...f, area_derecho: e.target.checked }))} /> Área: derecho
                   </label>
                   {/* Agrega más filtros visuales si lo deseas */}
                 </div>
