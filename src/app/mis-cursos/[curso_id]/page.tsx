@@ -3,6 +3,7 @@ import { useEffect, useState, Fragment } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import Link from 'next/link';
+import Footer from '../../../components/Footer';
 
 type Material = {
   id: number;
@@ -109,118 +110,121 @@ export default function MaterialesCursoPage() {
   if (!curso) return <div className="p-8">Curso no encontrado</div>;
 
   return (
-    <div className="min-h-screen bg-white flex">
-      {/* Menú lateral */}
-      <aside className="w-80 bg-[#f7fafc] border-r border-gray-200 p-4 overflow-y-auto h-[calc(100vh-40px)]">
-        <h2 className="text-lg font-bold mb-4 text-[#023474]">{curso.nombre}</h2>
-        <nav>
-          <ul>
-            {curso.modulos.map(modulo => (
-              <li key={modulo.id} className="mb-2">
-                <div className="font-semibold text-[#023474] mb-1">{modulo.nombre}</div>
-                <ul className="ml-3">
-                  {modulo.subtemas.map(subtema => (
-                    <li key={subtema.id} className="mb-1">
-                      <div className="text-sm font-medium text-gray-700 mb-1">{subtema.nombre}</div>
-                      <ul className="ml-2">
-                        {subtema.materiales.map(material => (
-                          <li key={material.id}>
-                            <button
-                              className={`text-xs px-2 py-1 rounded transition w-full text-left ${selected && selected.materialId === material.id ? 'bg-[#e6eef7] text-[#023474] font-bold' : 'hover:bg-gray-100 text-gray-700'}`}
-                              onClick={() => setSelected({ moduloId: modulo.id, subtemaId: subtema.id, materialId: material.id })}
-                            >
-                              {material.tipo === 'video' ? '🎬' : '📄'} {material.descripcion || material.tipo.toUpperCase()}
-                            </button>
+    <div className="min-h-screen flex flex-col bg-[#f4f7fa]">
+      <div className="flex flex-1 max-w-7xl w-full mx-auto mt-8 mb-4 gap-6">
+        {/* Menú lateral */}
+        <aside className="w-80 bg-white border border-gray-200 rounded-lg shadow-md p-4 overflow-y-auto h-[calc(80vh)]">
+          <h2 className="text-lg font-bold mb-4 text-[#023474]">{curso.nombre}</h2>
+          <nav>
+            <ul>
+              {curso.modulos.map(modulo => (
+                <li key={modulo.id} className="mb-2">
+                  <div className="font-semibold text-[#023474] mb-1">{modulo.nombre}</div>
+                  <ul className="ml-3">
+                    {modulo.subtemas.map(subtema => (
+                      <li key={subtema.id} className="mb-1">
+                        <div className="text-sm font-medium text-gray-700 mb-1">{subtema.nombre}</div>
+                        <ul className="ml-2">
+                          {subtema.materiales.map(material => (
+                            <li key={material.id}>
+                              <button
+                                className={`text-xs px-2 py-1 rounded transition w-full text-left ${selected && selected.materialId === material.id ? 'bg-[#e6eef7] text-[#023474] font-bold' : 'hover:bg-gray-100 text-gray-700'}`}
+                                onClick={() => setSelected({ moduloId: modulo.id, subtemaId: subtema.id, materialId: material.id })}
+                              >
+                                {material.tipo === 'video' ? '🎬' : '📄'} {material.descripcion || material.tipo.toUpperCase()}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+        {/* Panel de contenido */}
+        <main className="flex-1 bg-white rounded-lg shadow-md p-8 min-h-[80vh] border border-gray-200 flex flex-col">
+          {selectedMaterial ? (
+            <div className="mb-6">
+              <h1 className="text-xl font-bold mb-2 text-[#023474]">{selectedTitulo}</h1>
+              <div className="mb-4 flex flex-col items-center">
+                {selectedMaterial.tipo === 'video' ? (
+                  <iframe
+                    width="720"
+                    height="405"
+                    src={selectedMaterial.url}
+                    title="Video"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="rounded shadow w-full max-w-2xl"
+                  ></iframe>
+                ) : (
+                  <a
+                    href={selectedMaterial.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 underline text-lg"
+                  >
+                    {selectedMaterial.tipo.toUpperCase()} - {selectedMaterial.descripcion || 'Ver material'}
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="text-gray-500 italic mb-6">Selecciona un material del menú izquierdo para visualizarlo aquí.</div>
+          )}
+          {/* Acordeón Evaluaciones */}
+          <div className="mb-4 border rounded-lg overflow-hidden">
+            <button
+              className="w-full text-left px-4 py-2 bg-[#e6eef7] text-[#023474] font-semibold focus:outline-none transition"
+              onClick={() => setShowEvaluaciones(v => !v)}
+            >
+              Evaluaciones {showEvaluaciones ? '▲' : '▼'}
+            </button>
+            {showEvaluaciones && (
+              <div className="p-4 bg-white border-t">
+                {curso.modulos.map(modulo => (
+                  <Fragment key={modulo.id}>
+                    <div className="font-semibold text-[#023474] mb-1">{modulo.nombre}</div>
+                    {modulo.examenes && modulo.examenes.length > 0 ? (
+                      <ul className="mb-2 ml-2">
+                        {modulo.examenes.map((examen: any) => (
+                          <li key={examen.id} className="mb-1">
+                            {examen.nombre}{' '}
+                            <Link href={`/mis-cursos/${curso.id}/examenes/${examen.id}`}>
+                              <button className="bg-blue-700 text-white px-2 py-1 rounded hover:bg-blue-800 ml-2 text-xs">
+                                Rendir examen
+                              </button>
+                            </Link>
                           </li>
                         ))}
                       </ul>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
-      {/* Panel de contenido */}
-      <main className="flex-1 p-8 bg-white min-h-screen">
-        {selectedMaterial ? (
-          <div className="mb-6">
-            <h1 className="text-xl font-bold mb-2 text-[#023474]">{selectedTitulo}</h1>
-            <div className="mb-4">
-              {selectedMaterial.tipo === 'video' ? (
-                <iframe
-                  width="560"
-                  height="315"
-                  src={selectedMaterial.url}
-                  title="Video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="rounded shadow"
-                ></iframe>
-              ) : (
-                <a
-                  href={selectedMaterial.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-700 underline text-lg"
-                >
-                  {selectedMaterial.tipo.toUpperCase()} - {selectedMaterial.descripcion || 'Ver material'}
-                </a>
-              )}
-            </div>
+                    ) : (
+                      <div className="ml-2 text-gray-500 text-xs mb-2">No hay exámenes en este módulo.</div>
+                    )}
+                  </Fragment>
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="text-gray-500 italic mb-6">Selecciona un material del menú izquierdo para visualizarlo aquí.</div>
-        )}
-        {/* Acordeón Evaluaciones */}
-        <div className="mb-4 border rounded">
-          <button
-            className="w-full text-left px-4 py-2 bg-[#e6eef7] text-[#023474] font-semibold rounded-t focus:outline-none"
-            onClick={() => setShowEvaluaciones(v => !v)}
-          >
-            Evaluaciones {showEvaluaciones ? '▲' : '▼'}
-          </button>
-          {showEvaluaciones && (
-            <div className="p-4 bg-white border-t">
-              {curso.modulos.map(modulo => (
-                <Fragment key={modulo.id}>
-                  <div className="font-semibold text-[#023474] mb-1">{modulo.nombre}</div>
-                  {modulo.examenes && modulo.examenes.length > 0 ? (
-                    <ul className="mb-2 ml-2">
-                      {modulo.examenes.map((examen: any) => (
-                        <li key={examen.id} className="mb-1">
-                          {examen.nombre}{' '}
-                          <Link href={`/mis-cursos/${curso.id}/examenes/${examen.id}`}>
-                            <button className="bg-blue-700 text-white px-2 py-1 rounded hover:bg-blue-800 ml-2 text-xs">
-                              Rendir examen
-                            </button>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="ml-2 text-gray-500 text-xs mb-2">No hay exámenes en este módulo.</div>
-                  )}
-                </Fragment>
-              ))}
-            </div>
-          )}
-        </div>
-        {/* Acordeón Discusión */}
-        <div className="mb-4 border rounded">
-          <button
-            className="w-full text-left px-4 py-2 bg-[#e6eef7] text-[#023474] font-semibold rounded-t focus:outline-none"
-            onClick={() => setShowDiscusion(v => !v)}
-          >
-            Discusión {showDiscusion ? '▲' : '▼'}
-          </button>
-          {showDiscusion && (
-            <div className="p-4 bg-white border-t text-gray-500 italic">Próximamente: foro de discusión para este curso.</div>
-          )}
-        </div>
-      </main>
+          {/* Acordeón Discusión */}
+          <div className="mb-4 border rounded-lg overflow-hidden">
+            <button
+              className="w-full text-left px-4 py-2 bg-[#e6eef7] text-[#023474] font-semibold focus:outline-none transition"
+              onClick={() => setShowDiscusion(v => !v)}
+            >
+              Discusión {showDiscusion ? '▲' : '▼'}
+            </button>
+            {showDiscusion && (
+              <div className="p-4 bg-white border-t text-gray-500 italic">Próximamente: foro de discusión para este curso.</div>
+            )}
+          </div>
+        </main>
+      </div>
+      <Footer />
     </div>
   );
 } 
