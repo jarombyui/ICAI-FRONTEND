@@ -74,7 +74,7 @@ export default function MaterialesCursoPage() {
       .then(res => {
         const insc = res.data.find((i: any) => i.curso.id === Number(curso_id));
         if (!insc || insc.estado !== 'comprado') {
-          setMsg('No tienes acceso a este curso.');
+          setMsg('Tu pago está pendiente de aprobación por el administrador. Cuando sea aprobado, tendrás acceso al curso.');
           setLoading(false);
           return;
         }
@@ -87,7 +87,7 @@ export default function MaterialesCursoPage() {
   }, [curso_id, router]);
 
   if (loading) return <div className="p-8">Cargando...</div>;
-  if (msg) return <div className="p-8 text-red-600">{msg}</div>;
+  if (msg) return <div className="p-8 text-yellow-700 bg-yellow-100 border border-yellow-300 rounded">Tu pago está pendiente de aprobación por el administrador. Cuando sea aprobado, tendrás acceso al curso.</div>;
   if (!curso) return <div className="p-8">Curso no encontrado</div>;
 
   return (

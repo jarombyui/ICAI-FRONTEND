@@ -2,12 +2,15 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { UserIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isAuth, setIsAuth] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [showMenu, setShowMenu] = useState(false);
 
   // Refresca el usuario y autenticación
   const refreshUser = () => {
@@ -37,7 +40,10 @@ export default function Navbar() {
 
   return (
     <nav className="bg-blue-700 text-white px-6 py-3 flex justify-between items-center">
-      <div className="flex gap-4">
+      <div className="flex gap-4 items-center">
+        <button onClick={() => router.push('/mis-cursos')} className="focus:outline-none">
+          <Image src="/imagenes/logo/logo-icai.jpeg" alt="Logo" width={48} height={48} className="mr-2" />
+        </button>
         {isAuth && user?.rol === 'admin' ? (
           <>
             <Link href="/cursos" className="font-bold hover:underline">Explorar cursos</Link>
@@ -54,7 +60,30 @@ export default function Navbar() {
       </div>
       <div>
         {isAuth ? (
-          <button onClick={handleLogout} className="bg-blue-900 px-3 py-1 rounded hover:bg-blue-800">Cerrar sesión</button>
+          <div className="relative">
+            <button
+              className="flex items-center gap-2 bg-blue-900 px-3 py-1 rounded hover:bg-blue-800 focus:outline-none"
+              onClick={() => setShowMenu(v => !v)}
+              onBlur={() => setTimeout(() => setShowMenu(false), 150)}
+            >
+              <UserIcon className="w-5 h-5" />
+            </button>
+            {showMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-white text-gray-900 rounded shadow-lg z-50 p-4 flex flex-col gap-2 animate-fade-in">
+                {user && (
+                  <div className="font-bold uppercase text-xs text-gray-500">{`${(user?.nombre || '').toUpperCase()} ${(user?.apellido || '').toUpperCase()}`.trim()}</div>
+                )}
+                <div className="text-sm text-gray-700 mb-2">{user?.email}</div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-red-600 hover:underline text-sm mt-2"
+                >
+                  <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <Link href="/auth" className="bg-white text-blue-700 px-3 py-1 rounded hover:bg-gray-200">Login / Registro</Link>
         )}

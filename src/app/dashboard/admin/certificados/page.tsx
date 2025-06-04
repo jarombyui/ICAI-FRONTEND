@@ -31,14 +31,18 @@ export default function CertificadosAdminPage() {
             </tr>
           </thead>
           <tbody>
-            {certificados.map(c => (
+            {certificados.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="text-center">No hay certificados</td>
+              </tr>
+            ) : certificados.map(c => (
               <tr key={c.id} className="text-center">
                 <td>{c.id}</td>
                 <td>{c.usuario?.nombre} {c.usuario?.apellido}</td>
                 <td>{c.curso?.nombre}</td>
                 <td>{new Date(c.fecha_emision).toLocaleDateString()}</td>
                 <td>{c.horas}</td>
-1                <td><a href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api','') || 'http://localhost:4000'}${c.url_pdf}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver PDF</a></td>
+                <td><a href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api','') || 'http://localhost:4000'}${c.url_pdf}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver PDF</a></td>
               </tr>
             ))}
           </tbody>

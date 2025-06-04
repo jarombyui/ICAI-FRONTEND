@@ -112,6 +112,14 @@ export default function MisCursosPage() {
                       <span className={`px-2 py-1 rounded text-xs ${insc.estado === 'comprado' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>{insc.estado}</span>
                     </td>
                     <td className="py-2 px-4 flex gap-2 items-center">
+                      {insc.estado !== 'comprado' && (
+                        <Link
+                          href={`/pago/${insc.id}`}
+                          className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
+                        >
+                          Pagar
+                        </Link>
+                      )}
                       {/* Descargar certificado si existe */}
                       {insc.estado === 'comprado' && certificados.some(c => c.curso_id === insc.curso.id) && (
                         <button

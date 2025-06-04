@@ -1,6 +1,25 @@
+'use client';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function UserDashboard() {
+  const router = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const user = JSON.parse(atob(token.split('.')[1]));
+        if (user.rol === 'user') {
+          router.replace('/mis-cursos');
+        }
+      } catch {}
+    }
+  }, [router]);
+  return null;
+}
+
+export function UserDashboardContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 to-blue-500 text-white p-8">
       <h1 className="text-3xl font-bold mb-8">Mi Panel de Usuario</h1>
