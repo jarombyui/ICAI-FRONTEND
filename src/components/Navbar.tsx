@@ -34,15 +34,24 @@ export default function Navbar() {
   }, [pathname]);
 
   const handleLogout = () => {
+    // Limpiar token y posibles datos de sesión
     localStorage.removeItem('token');
-    router.push('/auth');
+    // Si tienes otros datos de sesión, agrégalos aquí:
+    // localStorage.removeItem('user');
+    setShowMenu(false); // Cierra el menú inmediatamente
+    setIsAuth(false);
+    setUser(null);
+    // Forzar refresco de la UI
+    setTimeout(() => {
+      router.replace('/auth');
+    }, 100);
   };
 
   return (
-    <nav className="bg-white text-[#023474] px-6 py-3 flex justify-between items-center border-b border-gray-200 shadow-sm">
-      <div className="flex gap-4 items-center">
-        <button onClick={() => router.push('/mis-cursos')} className="focus:outline-none">
-          <Image src="/imagenes/logo/logo-icai.jpeg" alt="Logo" width={72} height={72} className="mr-2" />
+    <nav className="bg-white text-[#023474] px-6 flex justify-between items-center border-b border-gray-200 shadow-sm" style={{ minHeight: '90px' }}>
+      <div className="flex gap-6 items-center h-full">
+        <button onClick={() => router.push('/mis-cursos')} className="focus:outline-none flex items-center h-full">
+          <Image src="/imagenes/logo/logo-icai.jpeg" alt="Logo" width={72} height={72} className="mr-2" priority style={{ height: '72px', width: 'auto' }} />
         </button>
         {isAuth && user?.rol === 'admin' ? (
           <>
