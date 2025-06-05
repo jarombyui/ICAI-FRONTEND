@@ -23,9 +23,9 @@ export default function AuthPage() {
         localStorage.setItem('token', res.data.token);
         const payload = JSON.parse(atob(res.data.token.split('.')[1]));
         if (payload.rol === 'admin') {
-          window.location.href = '/dashboard/admin';
+          window.location.replace('/dashboard/admin');
         } else {
-          window.location.href = '/dashboard/user';
+          window.location.replace('/dashboard/user');
         }
       } else {
         await api.post('/auth/register', form);
@@ -35,9 +35,9 @@ export default function AuthPage() {
         localStorage.setItem('token', res.data.token);
         const payload = JSON.parse(atob(res.data.token.split('.')[1]));
         if (payload.rol === 'admin') {
-          window.location.href = '/dashboard/admin';
+          window.location.replace('/dashboard/admin');
         } else {
-          window.location.href = '/dashboard/user';
+          window.location.replace('/dashboard/user');
         }
       }
     } catch (err: any) {

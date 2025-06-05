@@ -41,9 +41,9 @@ export default function Navbar() {
     setShowMenu(false); // Cierra el menú inmediatamente
     setIsAuth(false);
     setUser(null);
-    // Forzar refresco de la UI
+    // Forzar recarga total y limpiar historial
     setTimeout(() => {
-      router.replace('/auth');
+      window.location.replace('/landing');
     }, 100);
   };
 
