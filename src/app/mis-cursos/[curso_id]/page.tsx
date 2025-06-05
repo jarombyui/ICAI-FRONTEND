@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import Link from 'next/link';
 import Footer from '../../../components/Footer';
+import { youtubeToEmbed } from '../../../utils/youtubeToEmbed';
 
 type Material = {
   id: number;
@@ -154,7 +155,7 @@ export default function MaterialesCursoPage() {
                   <iframe
                     width="720"
                     height="405"
-                    src={selectedMaterial.url}
+                    src={youtubeToEmbed(selectedMaterial.url)}
                     title="Video"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

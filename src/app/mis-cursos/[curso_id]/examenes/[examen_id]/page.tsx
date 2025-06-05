@@ -58,6 +58,7 @@ export default function ExamenPage() {
   const [aprobado, setAprobado] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState(false);
+  const [certMsg, setCertMsg] = useState("");
 
   useEffect(() => {
     api.get(`/examenes/examenes/${examen_id}`)
@@ -96,7 +97,30 @@ export default function ExamenPage() {
     try {
       const res = await api.post(`/examenes/examenes/${examen_id}/responder`, body);
       setResultado(res.data);
-      if (res.data.aprobado) setAprobado(true);
+      if (res.data.aprobado) {
+        setAprobado(true);
+        // Emitir certificado automáticamente
+        try {
+          // Obtener curso_id desde el examen
+          const examenDetalle = examen;
+          let cursoId = null;
+          if (examenDetalle && examenDetalle.modulo_id) {
+            // Obtener el curso_id del módulo
+            const moduloRes = await api.get(`/modulos/${examenDetalle.modulo_id}`);
+            cursoId = moduloRes.data.curso_id;
+          }
+          if (cursoId) {
+            const token = localStorage.getItem('token');
+            if (token) {
+              const payload = JSON.parse(atob(token.split('.')[1]));
+              await api.post('/certificados/emitir', { usuario_id: payload.id, curso_id: cursoId });
+              setCertMsg('¡Certificado generado! Ahora puedes descargarlo desde Mis Cursos.');
+            }
+          }
+        } catch (err) {
+          setCertMsg('No se pudo emitir el certificado automáticamente, pero puedes intentar descargarlo desde Mis Cursos.');
+        }
+      }
     } catch {
       setMsg("No se pudo enviar el examen");
     }
@@ -151,6 +175,10 @@ export default function ExamenPage() {
               ))}
             </ul>
           </div>
+          {/* Mensaje de certificado */}
+          {resultado.aprobado && certMsg && (
+            <div className="mt-2 text-blue-700 font-semibold">{certMsg}</div>
+          )}
         </div>
       ) : aprobado ? (
         <div className="bg-green-50 border border-green-200 p-4 rounded mb-4 shadow flex items-center gap-2">

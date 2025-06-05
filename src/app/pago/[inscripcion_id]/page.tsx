@@ -124,11 +124,15 @@ export default function PagoPage() {
                 <div className="mt-2 text-sm text-black">Puedes pagar con Yape, Plin, transferencia bancaria, etc. Sube la imagen del comprobante.</div>
                 <div className="flex gap-4 mt-2">
                   <div className="flex flex-col items-center">
-                    <Image src="/imagenes/qr/qr-yape.png" alt="QR Yape" width={100} height={100} className="rounded" />
+                    <div style={{ background: '#fff', padding: 8, border: '2px solid #ccc', borderRadius: 8 }}>
+                      <Image src="/imagenes/QR/yape.jpeg" alt="QR Yape" width={200} height={200} />
+                    </div>
                     <span className="text-xs mt-1 text-black">Yape</span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <Image src="/imagenes/qr/qr-plin.png" alt="QR Plin" width={100} height={100} className="rounded" />
+                    <div style={{ background: '#fff', padding: 8, border: '2px solid #ccc', borderRadius: 8 }}>
+                      <Image src="/imagenes/QR/izipay.jpeg" alt="QR Izipay" width={200} height={200} />
+                    </div>
                     <span className="text-xs mt-1 text-black">Plin</span>
                   </div>
                 </div>

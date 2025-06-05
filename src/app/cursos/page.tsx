@@ -4,6 +4,7 @@ import api from '@/utils/api';
 import Link from 'next/link';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Footer from '../../components/Footer';
+import Spinner from '../../components/Spinner';
 
 type Curso = {
   id: number;
@@ -195,7 +196,7 @@ export default function CursosPage() {
               </div>
               {msg && <div className="mb-4 text-red-600">{msg}</div>}
               {loading ? (
-                <div>Cargando...</div>
+                <Spinner />
               ) : (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
