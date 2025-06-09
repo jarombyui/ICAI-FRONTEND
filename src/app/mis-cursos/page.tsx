@@ -12,14 +12,18 @@ type Curso = {
   descripcion: string;
   precio: number;
   horas: number;
-  imagen_url?: string;
-  examen_id?: number;
+  imagen_url: string;
 };
 
 type Inscripcion = {
   id: number;
   estado: string;
   curso: Curso;
+  pagos?: Array<{
+    id: number;
+    estado: string;
+    comprobante_url: string | null;
+  }>;
 };
 
 export default function MisCursosPage() {
@@ -34,10 +38,25 @@ export default function MisCursosPage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
+    
+    // Cargar inscripciones con sus pagos
     api.get('/inscripciones/mis')
-      .then(res => setInscripciones(res.data))
+      .then(async res => {
+        const inscripcionesConPagos = await Promise.all(
+          res.data.map(async (insc: Inscripcion) => {
+            try {
+              const pagosRes = await api.get(`/pagos/inscripcion/${insc.id}`);
+              return { ...insc, pagos: pagosRes.data };
+            } catch {
+              return insc;
+            }
+          })
+        );
+        setInscripciones(inscripcionesConPagos);
+      })
       .catch(() => setInscripciones([]))
       .finally(() => setLoading(false));
+
     // Obtener certificados del usuario
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -91,6 +110,10 @@ export default function MisCursosPage() {
     }
   };
 
+  const tienePagoPendiente = (inscripcion: Inscripcion) => {
+    return inscripcion.pagos?.some(p => p.estado === 'pendiente');
+  };
+
   return (
     <>
       <div className="min-h-screen bg-white">
@@ -113,29 +136,37 @@ export default function MisCursosPage() {
                 </thead>
                 <tbody>
                   {inscripciones.map(insc => (
-                    <tr key={insc.id} className="border-b hover:bg-gray-100">
-                      <td className="py-2 px-4 font-semibold text-black">
-                        <Link href={`/mis-cursos/${insc.curso.id}`}
-                          className="block transition rounded px-1 py-1 focus:outline-none"
-                          style={{ textDecoration: 'none', color: 'inherit' }}
-                        >
-                          <span className="block rounded px-1 py-1 cursor-pointer hover:bg-[#e6eef7] transition">
-                            {insc.curso.nombre}
-                          </span>
-                        </Link>
-                      </td>
-                      <td className="py-2 px-4 text-gray-700">{insc.curso.descripcion}</td>
+                    <tr key={insc.id} className="border-b">
                       <td className="py-2 px-4">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${insc.estado === 'comprado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>{insc.estado}</span>
+                        {insc.estado === 'comprado' ? (
+                          <Link href={`/mis-cursos/${insc.curso.id}`} className="font-semibold hover:opacity-80" style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>
+                            {insc.curso.nombre}
+                          </Link>
+                        ) : (
+                          <span className="text-black font-semibold">{insc.curso.nombre}</span>
+                        )}
+                      </td>
+                      <td className="py-2 px-4 text-black">{insc.curso.descripcion}</td>
+                      <td className="py-2 px-4">
+                        {insc.estado === 'comprado' ? (
+                          <span className="text-green-600 font-semibold">Comprado</span>
+                        ) : tienePagoPendiente(insc) ? (
+                          <span className="text-yellow-600 font-semibold">Pago pendiente de revisión</span>
+                        ) : (
+                          <span className="text-gray-600 font-semibold">Pendiente de pago</span>
+                        )}
                       </td>
                       <td className="py-2 px-4 flex gap-2 items-center">
-                        {insc.estado !== 'comprado' && (
+                        {insc.estado !== 'comprado' && !tienePagoPendiente(insc) && (
                           <Link
                             href={`/pago/${insc.id}`}
                             className="bg-[#023474] text-white px-3 py-1 rounded text-xs font-semibold hover:bg-[#23386f]"
                           >
                             Pagar
                           </Link>
+                        )}
+                        {tienePagoPendiente(insc) && (
+                          <span className="text-xs text-yellow-600 italic">Comprobante enviado, esperando revisión</span>
                         )}
                         {/* Descargar certificado si existe */}
                         {insc.estado === 'comprado' && certificados.some(c => c.curso_id === insc.curso.id) ? (

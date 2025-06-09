@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import Image from 'next/image';
+import { useNotification } from '@/contexts/NotificationContext';
 
 type Inscripcion = {
   id: number;
@@ -23,6 +24,7 @@ export default function PagoPage() {
   const [msg, setMsg] = useState('');
   const [comprobante, setComprobante] = useState<File | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     api.get('/inscripciones/mis')
@@ -88,9 +90,16 @@ export default function PagoPage() {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: formData
       });
-      setMsg('Constancia enviada para validación.');
+      
+      showNotification(
+        'Comprobante enviado exitosamente. Tu pago está pendiente de revisión y aprobación.',
+        'success',
+        true
+      );
+      
+      setTimeout(() => router.push('/mis-cursos'), 3000);
     } catch (err) {
-      setMsg('Error al enviar constancia');
+      showNotification('Error al enviar comprobante', 'error', true);
     } finally {
       setEnviando(false);
     }

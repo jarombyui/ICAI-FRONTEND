@@ -5,6 +5,7 @@ import "./globals.css";
 import Navbar from "../components/Navbar";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,14 +56,14 @@ export default function RootLayout({
   }, [pathname, router]);
 
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
-      >
-        {!hideNavbar && <Navbar />}
-        <div className="flex-1 flex flex-col">
-          {children}
-        </div>
+    <html lang="es">
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
+        <NotificationProvider>
+          {!hideNavbar && <Navbar />}
+          <div className="flex-1 flex flex-col">
+            {children}
+          </div>
+        </NotificationProvider>
       </body>
     </html>
   );

@@ -2,39 +2,90 @@
 import { useEffect, useState } from 'react';
 import api from '@/utils/api';
 import Image from 'next/image';
+import { useNotification } from '@/contexts/NotificationContext';
 
 export default function PagosAdminPage() {
   const [pagos, setPagos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
+  const [pagosNotificados, setPagosNotificados] = useState<Set<number>>(new Set());
+  const { showNotification } = useNotification();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
-  useEffect(() => {
-    api.get('/pagos/admin/listar')
-      .then(res => setPagos(res.data))
-      .catch(() => setMsg('Error al cargar pagos (verifica conexión y permisos)'))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const handleAprobar = async (id: number) => {
-    setMsg('');
-    try {
-      await api.put(`/pagos/${id}/estado`, { estado: 'aprobado' });
-      setPagos(pagos => pagos.map(p => p.id === id ? { ...p, estado: 'aprobado' } : p));
-      setMsg('Pago aprobado');
-    } catch {
-      setMsg('Error al aprobar pago');
+  const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+  const verificarPagosPendientes = async (pagos: any[]) => {
+    const pagosPendientes = pagos.filter((p: any) => 
+      p.estado === 'pendiente' && !pagosNotificados.has(p.id)
+    );
+    
+    if (pagosPendientes.length > 0) {
+      // Agregar los nuevos pagos pendientes al conjunto de notificados
+      const nuevosIds = new Set(pagosPendientes.map(p => p.id));
+      setPagosNotificados(prev => new Set([...prev, ...nuevosIds]));
+      // Notificación individual por cada pago pendiente, secuencial
+      for (const p of pagosPendientes) {
+        await showNotification(
+          `Nuevo comprobante de pago pendiente de revisión para el curso "${p.inscripcion?.curso?.nombre ?? ''}" de ${p.inscripcion?.usuario?.nombre ?? ''} ${p.inscripcion?.usuario?.apellido ?? ''}`,
+          'info',
+          true,
+          4000 // 4 segundos de duración
+        );
+        await delay(1500); // 1.5 segundos de espacio entre sonidos/notificaciones
+      }
     }
   };
 
-  const handleRechazar = async (id: number) => {
-    setMsg('');
+  useEffect(() => {
+    const cargarPagos = async () => {
+      try {
+        const res = await api.get('/pagos/admin/listar');
+        setPagos(res.data);
+        // Verificar pagos pendientes al cargar inicialmente
+        await verificarPagosPendientes(res.data);
+      } catch {
+        setMsg('Error al cargar pagos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarPagos();
+
+    // Configurar polling para nuevos pagos
+    const interval = setInterval(async () => {
+      try {
+        const res = await api.get('/pagos/admin/listar');
+        const nuevosPagos = res.data;
+        
+        // Verificar si hay nuevos pagos pendientes
+        await verificarPagosPendientes(nuevosPagos);
+        
+        setPagos(nuevosPagos);
+      } catch (error) {
+        console.error('Error al verificar nuevos pagos:', error);
+      }
+    }, 30000); // Verificar cada 30 segundos
+
+    return () => clearInterval(interval);
+  }, [showNotification, pagosNotificados]);
+
+  const handleAprobarPago = async (pagoId: number) => {
     try {
-      await api.put(`/pagos/${id}/estado`, { estado: 'rechazado' });
-      setPagos(pagos => pagos.map(p => p.id === id ? { ...p, estado: 'rechazado' } : p));
-      setMsg('Pago rechazado');
+      await api.put(`/pagos/${pagoId}/estado`, { estado: 'aprobado' });
+      setPagos(pagos.map(p => p.id === pagoId ? { ...p, estado: 'aprobado' } : p));
+      showNotification('Pago aprobado exitosamente', 'success');
     } catch {
-      setMsg('Error al rechazar pago');
+      setMsg('Error al aprobar el pago');
+    }
+  };
+
+  const handleRechazarPago = async (pagoId: number) => {
+    try {
+      await api.put(`/pagos/${pagoId}/estado`, { estado: 'rechazado' });
+      setPagos(pagos.map(p => p.id === pagoId ? { ...p, estado: 'rechazado' } : p));
+      showNotification('Pago rechazado', 'error');
+    } catch {
+      setMsg('Error al rechazar el pago');
     }
   };
 
@@ -55,6 +106,7 @@ export default function PagosAdminPage() {
               <th>Fecha</th>
               <th>Comprobante</th>
               <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -93,11 +145,29 @@ export default function PagosAdminPage() {
                   )}
                 </td>
                 <td>
-                  <span className={`px-2 py-1 rounded text-xs ${p.estado === 'aprobado' ? 'bg-green-200 text-green-800' : p.estado === 'rechazado' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'}`}>{p.estado}</span>
+                  <span className={`px-2 py-1 rounded text-sm ${
+                    p.estado === 'aprobado' ? 'bg-green-100 text-green-800' :
+                    p.estado === 'rechazado' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {p.estado}
+                  </span>
+                </td>
+                <td>
                   {p.estado === 'pendiente' && (
-                    <div className="flex flex-col gap-1 mt-2">
-                      <button onClick={() => handleAprobar(p.id)} className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700">Aprobar</button>
-                      <button onClick={() => handleRechazar(p.id)} className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700">Rechazar</button>
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        onClick={() => handleAprobarPago(p.id)}
+                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                      >
+                        Aprobar
+                      </button>
+                      <button
+                        onClick={() => handleRechazarPago(p.id)}
+                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                      >
+                        Rechazar
+                      </button>
                     </div>
                   )}
                 </td>

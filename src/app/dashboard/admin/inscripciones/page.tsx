@@ -67,26 +67,28 @@ export default function InscripcionesAdminPage() {
             </tr>
           </thead>
           <tbody>
-            {inscripcionesFiltradas.map(i => (
-              <tr key={i.id} className="text-center">
+            {inscripcionesFiltradas.map((i, idx) => (
+              <tr key={i.id} className={`text-center ${idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'} border-b border-gray-200`}>
                 <td>{i.id}</td>
                 <td>{i.usuario?.nombre} {i.usuario?.apellido}</td>
                 <td>{i.curso?.nombre}</td>
                 <td>{i.estado}</td>
                 <td>{new Date(i.fecha).toLocaleString()}</td>
-                <td className="flex flex-col gap-2 items-center justify-center">
-                  <button
-                    className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-800"
-                    onClick={() => handleEliminar(i.id)}
-                  >
-                    Eliminar registro
-                  </button>
-                  <button
-                    className="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600"
-                    onClick={() => handleRevertir(i.id)}
-                  >
-                    Revertir registro
-                  </button>
+                <td className="py-2 px-4">
+                  <div className="flex flex-row gap-2 justify-center items-center">
+                    <button
+                      className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-800"
+                      onClick={() => handleEliminar(i.id)}
+                    >
+                      Eliminar registro
+                    </button>
+                    <button
+                      className="bg-yellow-500 text-white px-2 py-1 rounded text-xs hover:bg-yellow-600"
+                      onClick={() => handleRevertir(i.id)}
+                    >
+                      Revertir registro
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
